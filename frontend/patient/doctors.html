@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find Doctors & Check Availability - CareSync</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col font-sans">
+
+    <!-- Top Navigation -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-6">
+                <a href="dashboard.html" class="flex items-center space-x-2.5 text-sky-600 font-extrabold text-xl">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-sky-600 to-teal-500 flex items-center justify-center text-white text-base shadow-sm">
+                        <i class="fa-solid fa-heart-pulse"></i>
+                    </div>
+                    <span>CareSync</span>
+                </a>
+                <nav class="hidden md:flex items-center space-x-1 text-sm font-medium">
+                    <a href="dashboard.html" class="px-3.5 py-2 text-slate-600 hover:text-sky-600 hover:bg-slate-50 rounded-xl transition-colors flex items-center">
+                        <i class="fa-solid fa-gauge mr-2"></i> Dashboard
+                    </a>
+                    <a href="doctors.html" class="px-3.5 py-2 text-sky-600 bg-sky-50 rounded-xl font-semibold flex items-center">
+                        <i class="fa-solid fa-user-doctor mr-2"></i> Find Doctors
+                    </a>
+                    <a href="book-appointment.html" class="px-3.5 py-2 text-slate-600 hover:text-sky-600 hover:bg-slate-50 rounded-xl transition-colors flex items-center">
+                        <i class="fa-solid fa-calendar-plus mr-2"></i> Book Appointment
+                    </a>
+                    <a href="appointments.html" class="px-3.5 py-2 text-slate-600 hover:text-sky-600 hover:bg-slate-50 rounded-xl transition-colors flex items-center">
+                        <i class="fa-solid fa-calendar-check mr-2"></i> My Appointments
+                    </a>
+                </nav>
+            </div>
+
+            <div class="flex items-center space-x-4">
+                <a href="profile.html" class="px-3 py-1.5 text-xs font-semibold text-slate-700 hover:text-sky-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors flex items-center">
+                    <i class="fa-solid fa-user mr-1.5"></i> Profile
+                </a>
+                <button onclick="auth.logout('../login.html')" class="px-3 py-1.5 text-xs font-semibold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-xl border border-rose-200 transition-colors">
+                    Logout
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow space-y-8">
+        
+        <!-- Hero Header -->
+        <div class="bg-gradient-to-r from-sky-700 via-sky-600 to-indigo-700 rounded-3xl p-6 sm:p-10 text-white shadow-xl relative overflow-hidden">
+            <div class="relative z-10 max-w-3xl">
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-white/20 text-sky-100 backdrop-blur-sm border border-white/20 mb-3">
+                    <i class="fa-solid fa-stethoscope mr-1.5 text-teal-300"></i> Real-time Physician Availability
+                </span>
+                <h1 class="text-2xl sm:text-4xl font-extrabold tracking-tight">Find Specialists & View Open Consultation Slots</h1>
+                <p class="text-sky-100 text-sm sm:text-base mt-2">
+                    Browse licensed physicians, inspect clinical qualifications, and dynamically calculate available consultation times across the week.
+                </p>
+            </div>
+            <!-- Decorative circle -->
+            <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
+        </div>
+
+        <!-- Search and Filter Bar -->
+        <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-4 sm:p-6 flex flex-col md:flex-row gap-4 items-center justify-between">
+            <div class="relative flex-grow w-full md:w-auto">
+                <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                <input id="search-input" type="text" placeholder="Search by physician name, degree, or specialty..."
+                    class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:bg-white transition-all">
+            </div>
+
+            <div class="flex items-center space-x-3 w-full md:w-auto">
+                <select id="specialization-filter" class="w-full md:w-60 px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500 bg-white transition-all">
+                    <option value="">All Specializations</option>
+                    <option value="Cardiology">Cardiology</option>
+                    <option value="Dermatology">Dermatology</option>
+                    <option value="Endocrinology">Endocrinology</option>
+                    <option value="Gastroenterology">Gastroenterology</option>
+                    <option value="General Medicine">General Medicine</option>
+                    <option value="General Practice">General Practice</option>
+                    <option value="Neurology">Neurology</option>
+                    <option value="Obstetrics & Gynecology">Obstetrics & Gynecology</option>
+                    <option value="Ophthalmology">Ophthalmology</option>
+                    <option value="Orthopedics">Orthopedics</option>
+                    <option value="Pediatrics">Pediatrics</option>
+                    <option value="Psychiatry">Psychiatry</option>
+                    <option value="Radiology">Radiology</option>
+                    <option value="Urology">Urology</option>
+                </select>
+
+                <button onclick="filterAndRenderDoctors()" class="px-5 py-3 bg-sky-600 hover:bg-sky-700 text-white rounded-2xl text-sm font-bold transition-all shadow-md">
+                    Filter
+                </button>
+            </div>
+        </div>
+
+        <!-- Doctors Grid Container -->
+        <div id="doctors-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="col-span-full py-16 text-center text-slate-400">
+                <i class="fa-solid fa-circle-notch fa-spin text-2xl text-sky-500 mb-2"></i>
+                <p>Loading available doctors...</p>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Dynamic Availability Modal -->
+    <div id="availability-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl border border-slate-100 overflow-hidden">
+            
+            <!-- Modal Header -->
+            <div class="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-2xl bg-sky-100 text-sky-600 flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-calendar-check"></i>
+                    </div>
+                    <div>
+                        <h3 id="modal-doc-name" class="text-base font-bold text-slate-900">Dr. Physician</h3>
+                        <p id="modal-doc-spec" class="text-xs text-sky-600 font-semibold">Specialization</p>
+                    </div>
+                </div>
+                <button onclick="closeAvailabilityModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition-colors">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="p-6 overflow-y-auto space-y-6 flex-grow">
+                
+                <!-- Date Picker Controls -->
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div>
+                        <label for="slot-date-picker" class="block text-xs font-bold text-slate-700 mb-1">Consultation Date</label>
+                        <input id="slot-date-picker" type="date" 
+                            class="px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500">
+                    </div>
+
+                    <!-- Quick Day Presets -->
+                    <div class="flex flex-wrap gap-1.5 text-xs">
+                        <button type="button" onclick="setRelativeDay(0)" class="px-3 py-1.5 bg-white hover:bg-slate-100 border border-slate-200 rounded-lg font-medium text-slate-700 transition-colors">Today</button>
+                        <button type="button" onclick="setRelativeDay(1)" class="px-3 py-1.5 bg-white hover:bg-slate-100 border border-slate-200 rounded-lg font-medium text-slate-700 transition-colors">Tomorrow</button>
+                        <button type="button" onclick="setRelativeDay(2)" class="px-3 py-1.5 bg-white hover:bg-slate-100 border border-slate-200 rounded-lg font-medium text-slate-700 transition-colors">+2 Days</button>
+                    </div>
+                </div>
+
+                <!-- Slots Status & Legend -->
+                <div class="flex items-center justify-between text-xs text-slate-500 px-1">
+                    <span id="availability-summary-text" class="font-bold text-slate-800">Available Slots</span>
+                    <div class="flex items-center space-x-3 text-2xs">
+                        <span class="flex items-center"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 mr-1.5"></span> Available</span>
+                        <span class="flex items-center"><span class="w-2.5 h-2.5 rounded-full bg-amber-400 mr-1.5"></span> Held</span>
+                        <span class="flex items-center"><span class="w-2.5 h-2.5 rounded-full bg-slate-300 mr-1.5"></span> Booked</span>
+                    </div>
+                </div>
+
+                <!-- Live Slots Grid -->
+                <div id="slots-grid-container" class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    <!-- Populated dynamically -->
+                </div>
+
+                <!-- Status Messages / Alerts -->
+                <div id="modal-alert-box" class="hidden"></div>
+
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="p-6 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div id="selected-slot-info" class="hidden text-xs text-slate-600">
+                    Selected: <span id="selected-slot-text" class="font-bold text-sky-700 text-sm">--:--</span>
+                </div>
+                <div class="flex items-center space-x-3 w-full sm:w-auto justify-end ml-auto">
+                    <button onclick="closeAvailabilityModal()" class="px-4 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-200 rounded-xl transition-colors">
+                        Cancel
+                    </button>
+                    <a id="book-slot-btn" href="#" class="px-5 py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center">
+                        <i class="fa-solid fa-calendar-check mr-1.5"></i> Proceed to Book
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500 mt-auto">
+        © 2026 CareSync Healthcare Appointment Manager. Phase 9 Patient Portal.
+    </footer>
+
+    <!-- Scripts -->
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+    <script>
+        let allDoctors = [];
+        let currentModalDoctorId = null;
+        let selectedSlotTime = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const user = await auth.requireAuth('PATIENT', '../');
+            if (!user) return;
+
+            // Setup date picker limits
+            const todayStr = new Date().toISOString().split('T')[0];
+            const datePicker = document.getElementById('slot-date-picker');
+            datePicker.min = todayStr;
+            datePicker.value = todayStr;
+
+            // Check URL search parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const searchParam = urlParams.get('search');
+            const specParam = urlParams.get('spec');
+
+            if (searchParam) {
+                document.getElementById('search-input').value = searchParam;
+            }
+            if (specParam) {
+                document.getElementById('specialization-filter').value = specParam;
+            }
+
+            await fetchDoctors();
+
+            // Real-time search filter
+            document.getElementById('search-input').addEventListener('input', filterAndRenderDoctors);
+            document.getElementById('specialization-filter').addEventListener('change', filterAndRenderDoctors);
+            document.getElementById('slot-date-picker').addEventListener('change', () => {
+                if (currentModalDoctorId) {
+                    loadDynamicAvailability(currentModalDoctorId);
+                }
+            });
+        });
+
+        async function fetchDoctors() {
+            const container = document.getElementById('doctors-container');
+            container.innerHTML = `
+                <div class="col-span-full py-16 text-center text-slate-400">
+                    <i class="fa-solid fa-circle-notch fa-spin text-2xl text-sky-500 mb-2"></i>
+                    <p>Loading verified physicians...</p>
+                </div>
+            `;
+
+            const res = await api.get('/api/doctors?active_only=true');
+            if (res.success && Array.isArray(res.data)) {
+                allDoctors = res.data;
+                filterAndRenderDoctors();
+            } else {
+                container.innerHTML = `
+                    <div class="col-span-full py-12 text-center text-rose-600 font-medium">
+                        Failed to fetch physicians: ${res.error || 'Server error'}
+                    </div>
+                `;
+            }
+        }
+
+        function filterAndRenderDoctors() {
+            const query = document.getElementById('search-input').value.trim().toLowerCase();
+            const spec = document.getElementById('specialization-filter').value.trim();
+            const container = document.getElementById('doctors-container');
+
+            const filtered = allDoctors.filter(doc => {
+                const matchesSpec = !spec || (doc.specialization && doc.specialization.toLowerCase() === spec.toLowerCase());
+                const matchesQuery = !query || 
+                    (doc.name && doc.name.toLowerCase().includes(query)) ||
+                    (doc.specialization && doc.specialization.toLowerCase().includes(query)) ||
+                    (doc.qualification && doc.qualification.toLowerCase().includes(query));
+                return matchesSpec && matchesQuery;
+            });
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full py-16 text-center text-slate-400 bg-white rounded-3xl border border-slate-200 p-8">
+                        <i class="fa-solid fa-user-doctor text-4xl text-slate-300 mb-3"></i>
+                        <p class="font-bold text-slate-700 text-base">No doctors found</p>
+                        <p class="text-xs text-slate-500 mt-1">Try adjusting your search terms or specialization filters.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filtered.map(doc => `
+                <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm hover:shadow-md hover:border-sky-200 transition-all p-6 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-start justify-between gap-3 mb-4">
+                            <div class="flex items-center space-x-3.5">
+                                <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-sky-600 to-teal-600 text-white font-bold text-base flex items-center justify-center shadow-sm">
+                                    <i class="fa-solid fa-user-doctor"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-base text-slate-900 leading-snug">Dr. ${doc.name}</h3>
+                                    <span class="inline-block text-xs font-semibold text-sky-700 bg-sky-50 px-2.5 py-0.5 rounded-lg mt-0.5">
+                                        ${doc.specialization}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2 text-xs text-slate-600 border-t border-slate-100 pt-3.5 mb-5">
+                            <p class="flex items-center">
+                                <i class="fa-solid fa-graduation-cap text-slate-400 w-5"></i>
+                                <span class="font-medium">${doc.qualification || 'Licensed Medical Practitioner'}</span>
+                            </p>
+                            <p class="flex items-center">
+                                <i class="fa-solid fa-business-time text-slate-400 w-5"></i>
+                                <span>${doc.experience ? doc.experience + ' Years Clinical Experience' : 'Certified Specialist'}</span>
+                            </p>
+                            <p class="flex items-center">
+                                <i class="fa-regular fa-clock text-slate-400 w-5"></i>
+                                <span>${doc.slot_duration} Minute Consultation Slots</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <button onclick="openAvailabilityModal(${doc.id}, '${doc.name.replace(/'/g, "\\'")}', '${doc.specialization.replace(/'/g, "\\'")}', '${(doc.qualification || '').replace(/'/g, "\\'")}')" 
+                            class="w-full py-2.5 px-4 bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center justify-center">
+                            <i class="fa-solid fa-calendar-days mr-1.5"></i> View Available Slots
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function setRelativeDay(offsetDays) {
+            const d = new Date();
+            d.setDate(d.getDate() + offsetDays);
+            const iso = d.toISOString().split('T')[0];
+            document.getElementById('slot-date-picker').value = iso;
+            if (currentModalDoctorId) {
+                loadDynamicAvailability(currentModalDoctorId);
+            }
+        }
+
+        function openAvailabilityModal(docId, name, spec, qual) {
+            currentModalDoctorId = docId;
+            document.getElementById('modal-doc-name').textContent = `Dr. ${name}`;
+            document.getElementById('modal-doc-spec').textContent = `${spec} • ${qual}`;
+            document.getElementById('selected-slot-info').classList.add('hidden');
+            document.getElementById('book-slot-btn').href = `book-appointment.html?doctor_id=${docId}`;
+
+            document.getElementById('availability-modal').classList.remove('hidden');
+            loadDynamicAvailability(docId);
+        }
+
+        function closeAvailabilityModal() {
+            document.getElementById('availability-modal').classList.add('hidden');
+            currentModalDoctorId = null;
+        }
+
+        async function loadDynamicAvailability(docId) {
+            const dateVal = document.getElementById('slot-date-picker').value;
+            const grid = document.getElementById('slots-grid-container');
+            const alertBox = document.getElementById('modal-alert-box');
+            const summaryText = document.getElementById('availability-summary-text');
+
+            grid.innerHTML = `
+                <div class="col-span-full py-8 text-center text-slate-400 text-xs">
+                    <i class="fa-solid fa-circle-notch fa-spin text-sky-500 text-lg mb-2"></i>
+                    <p>Calculating live availability...</p>
+                </div>
+            `;
+            alertBox.classList.add('hidden');
+            document.getElementById('selected-slot-info').classList.add('hidden');
+
+            const res = await api.get(`/api/doctors/${docId}/availability?date=${dateVal}`);
+
+            if (res.success && res.data) {
+                const data = res.data;
+                summaryText.textContent = `${data.available_slots_count} Available Slot(s)`;
+
+                if (data.is_on_leave) {
+                    grid.innerHTML = '';
+                    alertBox.className = 'p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center';
+                    alertBox.innerHTML = `
+                        <i class="fa-solid fa-umbrella-beach text-rose-500 text-lg mr-3"></i>
+                        <div>
+                            <p class="font-bold">Physician on Leave</p>
+                            <p class="text-2xs text-rose-600 mt-0.5">${data.message}</p>
+                        </div>
+                    `;
+                    alertBox.classList.remove('hidden');
+                    return;
+                }
+
+                if (!data.is_working_day) {
+                    grid.innerHTML = '';
+                    alertBox.className = 'p-4 rounded-2xl bg-slate-100 border border-slate-200 text-slate-700 text-xs flex items-center';
+                    alertBox.innerHTML = `
+                        <i class="fa-solid fa-calendar-xmark text-slate-400 text-lg mr-3"></i>
+                        <div>
+                            <p class="font-bold">Not a Working Day</p>
+                            <p class="text-2xs text-slate-500 mt-0.5">${data.message}</p>
+                        </div>
+                    `;
+                    alertBox.classList.remove('hidden');
+                    return;
+                }
+
+                if (data.slots.length === 0) {
+                    grid.innerHTML = '';
+                    alertBox.className = 'p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-800 text-xs flex items-center';
+                    alertBox.innerHTML = `
+                        <i class="fa-solid fa-clock text-amber-500 text-lg mr-3"></i>
+                        <div>
+                            <p class="font-bold">No Consultation Slots</p>
+                            <p class="text-2xs text-amber-700 mt-0.5">No slots configured for this schedule.</p>
+                        </div>
+                    `;
+                    alertBox.classList.remove('hidden');
+                    return;
+                }
+
+                grid.innerHTML = data.slots.map(s => {
+                    const startStr = s.start_time.substring(0, 5);
+                    const endStr = s.end_time.substring(0, 5);
+                    const isAvail = s.is_available;
+                    const isHeld = s.status === 'HELD';
+
+                    if (isAvail) {
+                        return `
+                            <button type="button" onclick="selectSlot('${startStr} - ${endStr}')" 
+                                class="slot-btn p-3 rounded-2xl border border-emerald-200 bg-emerald-50/60 hover:bg-emerald-100 hover:border-emerald-400 text-emerald-900 text-xs font-bold transition-all text-center flex flex-col items-center justify-center focus:ring-2 focus:ring-sky-500">
+                                <span>${startStr} – ${endStr}</span>
+                                <span class="text-2xs font-semibold text-emerald-600 uppercase tracking-wider mt-0.5">Available</span>
+                            </button>
+                        `;
+                    } else if (isHeld) {
+                        return `
+                            <div class="p-3 rounded-2xl border border-amber-200 bg-amber-50 text-amber-800 text-xs font-medium text-center flex flex-col items-center justify-center cursor-not-allowed opacity-75">
+                                <span>${startStr} – ${endStr}</span>
+                                <span class="text-2xs font-semibold text-amber-600 uppercase tracking-wider mt-0.5">On Hold</span>
+                            </div>
+                        `;
+                    } else {
+                        return `
+                            <div class="p-3 rounded-2xl border border-slate-200 bg-slate-100 text-slate-400 text-xs font-medium text-center flex flex-col items-center justify-center cursor-not-allowed line-through">
+                                <span>${startStr} – ${endStr}</span>
+                                <span class="text-2xs font-semibold text-slate-400 uppercase tracking-wider mt-0.5 no-underline">Booked</span>
+                            </div>
+                        `;
+                    }
+                }).join('');
+
+            } else {
+                grid.innerHTML = '';
+                alertBox.className = 'p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center';
+                alertBox.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-rose-500 mr-2"></i> ${res.error || 'Failed to calculate availability'}`;
+                alertBox.classList.remove('hidden');
+            }
+        }
+
+        function selectSlot(timeRange) {
+            selectedSlotTime = timeRange;
+            const startTime = timeRange.split(' – ')[0] + ':00';
+            const dateVal = document.getElementById('slot-date-picker').value;
+
+            document.getElementById('selected-slot-text').textContent = timeRange;
+            document.getElementById('book-slot-btn').href = `book-appointment.html?doctor_id=${currentModalDoctorId}&date=${dateVal}&time=${startTime}`;
+            document.getElementById('selected-slot-info').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>

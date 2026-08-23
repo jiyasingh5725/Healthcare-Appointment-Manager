@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In - Healthcare Appointment Manager</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+
+    <div class="sm:mx-auto sm:w-full sm:max-w-md text-center">
+        <a href="index.html" class="inline-flex items-center space-x-2 text-sky-600 font-extrabold text-2xl">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-sky-600 to-teal-500 flex items-center justify-center text-white text-lg shadow-sm">
+                <i class="fa-solid fa-heart-pulse"></i>
+            </div>
+            <span>CareSync</span>
+        </a>
+        <h2 id="portal-title" class="mt-4 text-3xl font-extrabold text-slate-900 tracking-tight">Sign in to your account</h2>
+        <p id="portal-subtitle" class="mt-2 text-sm text-slate-600">
+            Select your role below or enter your credentials
+        </p>
+    </div>
+
+    <div class="mt-6 sm:mx-auto sm:w-full sm:max-w-lg">
+        <!-- Active Session Banner (if logged in) -->
+        <div id="active-session-banner" class="hidden mb-4 p-4 rounded-2xl bg-sky-50 border border-sky-200 text-sky-900 shadow-sm">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 rounded-full bg-sky-600 text-white flex items-center justify-center text-xs font-bold" id="session-avatar">US</div>
+                    <div>
+                        <div class="text-xs font-bold leading-tight" id="session-user-name">User Name</div>
+                        <div class="text-3xs text-sky-700" id="session-user-role">Role: PATIENT</div>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <a id="session-dash-link" href="patient/dashboard.html" class="px-3 py-1.5 text-xs font-bold bg-sky-600 hover:bg-sky-700 text-white rounded-lg transition-all shadow-xs">
+                        Open Dashboard <i class="fa-solid fa-arrow-right ml-1"></i>
+                    </a>
+                    <button onclick="auth.logout('login.html')" class="px-2.5 py-1.5 text-xs font-medium text-slate-600 hover:text-rose-600 hover:bg-white rounded-lg transition-all" title="Log out to switch account">
+                        <i class="fa-solid fa-right-from-bracket"></i> Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Role Switcher Tabs -->
+        <div class="bg-slate-200/80 p-1.5 rounded-2xl grid grid-cols-3 gap-1 mb-4 shadow-inner">
+            <button type="button" onclick="selectRole('PATIENT')" id="tab-patient" class="role-tab flex items-center justify-center py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all bg-white text-sky-700 shadow-sm">
+                <i class="fa-solid fa-hospital-user mr-1.5 sm:mr-2"></i> Patient
+            </button>
+            <button type="button" onclick="selectRole('DOCTOR')" id="tab-doctor" class="role-tab flex items-center justify-center py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold transition-all text-slate-600 hover:text-teal-700">
+                <i class="fa-solid fa-user-doctor mr-1.5 sm:mr-2"></i> Doctor
+            </button>
+            <button type="button" onclick="selectRole('ADMIN')" id="tab-admin" class="role-tab flex items-center justify-center py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold transition-all text-slate-600 hover:text-indigo-700">
+                <i class="fa-solid fa-shield-halved mr-1.5 sm:mr-2"></i> Admin
+            </button>
+        </div>
+
+        <div class="bg-white py-8 px-6 shadow-sm border border-slate-200/80 rounded-2xl sm:px-10">
+            
+            <!-- Alert Messages -->
+            <div id="alert-box" class="hidden mb-6 p-4 rounded-xl text-sm"></div>
+
+            <!-- Quick 1-Click Demo Login Box -->
+            <div id="demo-box" class="mb-6 p-4 rounded-xl border border-sky-100 bg-sky-50/60 transition-all">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-bold text-slate-800 flex items-center" id="demo-role-badge">
+                        <i class="fa-solid fa-key text-sky-600 mr-1.5"></i> Patient Demo Account
+                    </span>
+                    <span class="text-3xs text-slate-500 font-mono bg-white px-2 py-0.5 rounded border border-slate-200" id="demo-creds-display">patient@example.com</span>
+                </div>
+                <div class="flex items-center justify-between gap-3">
+                    <p class="text-xs text-slate-600 leading-snug" id="demo-desc">
+                        Sign in instantly with preconfigured demo credentials.
+                    </p>
+                    <button type="button" id="quick-demo-btn" onclick="quickDemoLogin()" class="shrink-0 px-3.5 py-2 text-xs font-bold text-white bg-sky-600 hover:bg-sky-700 rounded-lg shadow-sm hover:shadow transition-all flex items-center">
+                        <i class="fa-solid fa-bolt mr-1.5"></i> 1-Click Demo Sign In
+                    </button>
+                </div>
+            </div>
+
+            <div class="relative flex py-2 items-center mb-4">
+                <div class="flex-grow border-t border-slate-200"></div>
+                <span class="flex-shrink mx-4 text-xs font-medium text-slate-400">or enter credentials manually</span>
+                <div class="flex-grow border-t border-slate-200"></div>
+            </div>
+
+            <form id="login-form" class="space-y-4">
+                <div>
+                    <label for="email" class="block text-sm font-medium text-slate-700">Email Address</label>
+                    <div class="mt-1 relative rounded-lg shadow-sm">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                            <i class="fa-solid fa-envelope text-sm"></i>
+                        </div>
+                        <input id="email" name="email" type="email" autocomplete="email" required 
+                            placeholder="name@example.com"
+                            class="block w-full pl-10 pr-3 py-2.5 border border-slate-300 rounded-lg text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="password" class="block text-sm font-medium text-slate-700">Password</label>
+                    <div class="mt-1 relative rounded-lg shadow-sm">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                            <i class="fa-solid fa-lock text-sm"></i>
+                        </div>
+                        <input id="password" name="password" type="password" autocomplete="current-password" required 
+                            placeholder="••••••••"
+                            class="block w-full pl-10 pr-10 py-2.5 border border-slate-300 rounded-lg text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all">
+                        <button type="button" id="toggle-password" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600">
+                            <i class="fa-regular fa-eye text-sm" id="eye-icon"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between text-sm pt-1">
+                    <label class="flex items-center text-slate-600 cursor-pointer select-none text-xs sm:text-sm">
+                        <input type="checkbox" class="h-4 w-4 text-sky-600 focus:ring-sky-500 border-slate-300 rounded" checked>
+                        <span class="ml-2">Remember me</span>
+                    </label>
+                    <a id="register-redirect-link" href="register.html" class="font-medium text-xs sm:text-sm text-sky-600 hover:text-sky-700">
+                        Create Patient Account →
+                    </a>
+                </div>
+
+                <div class="pt-2">
+                    <button type="submit" id="submit-btn" class="w-full flex justify-center items-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-sky-600 hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 transition-all">
+                        <span id="btn-text">Sign In</span>
+                        <i id="btn-spinner" class="hidden fa-solid fa-circle-notch fa-spin ml-2"></i>
+                    </button>
+                </div>
+            </form>
+
+            <div id="role-info-note" class="mt-6 text-center text-xs text-slate-500 border-t border-slate-100 pt-4">
+                <span>Secure access protected with JWT & Role-Based Access Control</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        const DEMO_ACCOUNTS = {
+            PATIENT: {
+                roleName: 'Patient Portal',
+                themeColor: 'sky',
+                email: 'patient@example.com',
+                password: 'Password123!',
+                title: 'Patient Sign In',
+                subtitle: 'Sign in to book consultations, track prescriptions, and sync calendars',
+                desc: 'Instant patient access to book slots and manage medical records.',
+                icon: 'fa-hospital-user',
+                btnBg: 'bg-sky-600 hover:bg-sky-700 focus:ring-sky-500',
+                tabActive: 'bg-white text-sky-700 shadow-sm font-bold',
+                tabInactive: 'text-slate-600 hover:text-sky-700 font-semibold',
+                infoNote: 'New patient? <a href="register.html" class="font-semibold text-sky-600 hover:underline">Register your patient account here</a>.'
+            },
+            DOCTOR: {
+                roleName: 'Doctor Clinical Portal',
+                themeColor: 'teal',
+                email: 'doctor@hospital.org',
+                password: 'DoctorPass123!',
+                title: 'Doctor Clinical Sign In',
+                subtitle: 'Access daily patient appointments, AI clinical summaries & prescriptions',
+                desc: 'Instant physician access to clinical queues and consultation notes.',
+                icon: 'fa-user-doctor',
+                btnBg: 'bg-teal-600 hover:bg-teal-700 focus:ring-teal-500',
+                tabActive: 'bg-white text-teal-700 shadow-sm font-bold',
+                tabInactive: 'text-slate-600 hover:text-teal-700 font-semibold',
+                infoNote: 'Doctor accounts are provisioned by hospital administrators. Use demo credentials or your assigned clinical email.'
+            },
+            ADMIN: {
+                roleName: 'Administrator Portal',
+                themeColor: 'indigo',
+                email: 'admin@hospital.org',
+                password: 'AdminPass123!',
+                title: 'Administrator Operations Sign In',
+                subtitle: 'Manage doctor profiles, working shifts, leaves, and system metrics',
+                desc: 'Instant administrative access to staff directory, schedules, and delivery logs.',
+                icon: 'fa-shield-halved',
+                btnBg: 'bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500',
+                tabActive: 'bg-white text-indigo-700 shadow-sm font-bold',
+                tabInactive: 'text-slate-600 hover:text-indigo-700 font-semibold',
+                infoNote: 'System administrator access is restricted to authorized hospital personnel.'
+            }
+        };
+
+        let currentSelectedRole = 'PATIENT';
+
+        function selectRole(roleKey, autoFill = true) {
+            currentSelectedRole = roleKey;
+            const config = DEMO_ACCOUNTS[roleKey] || DEMO_ACCOUNTS.PATIENT;
+
+            // Update Tabs
+            ['PATIENT', 'DOCTOR', 'ADMIN'].forEach(r => {
+                const tab = document.getElementById(`tab-${r.toLowerCase()}`);
+                if (tab) {
+                    if (r === roleKey) {
+                        tab.className = `role-tab flex items-center justify-center py-2.5 px-3 rounded-xl text-xs sm:text-sm transition-all ${config.tabActive}`;
+                    } else {
+                        tab.className = `role-tab flex items-center justify-center py-2.5 px-3 rounded-xl text-xs sm:text-sm transition-all ${DEMO_ACCOUNTS[r].tabInactive}`;
+                    }
+                }
+            });
+
+            // Update Titles & Subtitles
+            document.getElementById('portal-title').textContent = config.title;
+            document.getElementById('portal-subtitle').textContent = config.subtitle;
+
+            // Update Demo Box
+            const demoBox = document.getElementById('demo-box');
+            demoBox.className = `mb-6 p-4 rounded-xl border border-${config.themeColor}-100 bg-${config.themeColor}-50/60 transition-all`;
+            
+            document.getElementById('demo-role-badge').innerHTML = `<i class="fa-solid ${config.icon} text-${config.themeColor}-600 mr-1.5"></i> ${config.roleName} Demo`;
+            document.getElementById('demo-creds-display').textContent = `${config.email}`;
+            document.getElementById('demo-desc').textContent = config.desc;
+
+            const quickBtn = document.getElementById('quick-demo-btn');
+            quickBtn.className = `shrink-0 px-3.5 py-2 text-xs font-bold text-white ${config.btnBg} rounded-lg shadow-sm hover:shadow transition-all flex items-center`;
+
+            // Update Submit Button
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.className = `w-full flex justify-center items-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white ${config.btnBg} focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all`;
+            document.getElementById('btn-text').textContent = `Sign In as ${roleKey.charAt(0) + roleKey.slice(1).toLowerCase()}`;
+
+            // Update Bottom Note
+            document.getElementById('role-info-note').innerHTML = config.infoNote;
+
+            // Auto-fill inputs if requested
+            if (autoFill) {
+                document.getElementById('email').value = config.email;
+                document.getElementById('password').value = config.password;
+            }
+        }
+
+        async function quickDemoLogin() {
+            const config = DEMO_ACCOUNTS[currentSelectedRole];
+            document.getElementById('email').value = config.email;
+            document.getElementById('password').value = config.password;
+
+            const form = document.getElementById('login-form');
+            form.dispatchEvent(new Event('submit', { cancelable: true }));
+        }
+
+        // Initialize Page State
+        document.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            const alertBox = document.getElementById('alert-box');
+
+            // 1. Check if existing user is logged in
+            const loggedInUser = auth.getUser();
+            const token = auth.getToken();
+            if (loggedInUser && token) {
+                const banner = document.getElementById('active-session-banner');
+                const avatar = document.getElementById('session-avatar');
+                const nameEl = document.getElementById('session-user-name');
+                const roleEl = document.getElementById('session-user-role');
+                const dashLink = document.getElementById('session-dash-link');
+
+                nameEl.textContent = loggedInUser.name || 'Active User';
+                roleEl.textContent = `Current Session: ${loggedInUser.role}`;
+                avatar.textContent = (loggedInUser.name || 'U').substring(0, 2).toUpperCase();
+                dashLink.href = auth.getDashboardPath(loggedInUser.role);
+                banner.classList.remove('hidden');
+            }
+
+            // 2. Query param role selection (?role=doctor, ?role=admin)
+            const roleParam = (params.get('role') || '').toUpperCase();
+            if (roleParam === 'DOCTOR' || roleParam === 'ADMIN' || roleParam === 'PATIENT') {
+                selectRole(roleParam, true);
+            } else {
+                selectRole('PATIENT', true);
+            }
+
+            // 3. Role mismatch or switch alert
+            if (params.get('switch') === 'true') {
+                const prevRole = params.get('prevRole') || 'another account';
+                alertBox.className = 'mb-6 p-4 rounded-xl text-sm bg-amber-50 text-amber-800 border border-amber-200 flex items-center';
+                alertBox.innerHTML = `<i class="fa-solid fa-circle-info mr-2 text-amber-600"></i> You were signed in as <strong>${prevRole}</strong>. Please sign in with <strong>${currentSelectedRole}</strong> credentials to access this portal.`;
+                alertBox.classList.remove('hidden');
+            } else if (params.get('registered') === 'true') {
+                alertBox.className = 'mb-6 p-4 rounded-xl text-sm bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center';
+                alertBox.innerHTML = '<i class="fa-solid fa-circle-check mr-2 text-emerald-600"></i> Account created successfully! Please sign in below.';
+                alertBox.classList.remove('hidden');
+            }
+        });
+
+        // Toggle password visibility
+        const togglePassword = document.getElementById('toggle-password');
+        const passwordInput = document.getElementById('password');
+        const eyeIcon = document.getElementById('eye-icon');
+        togglePassword.addEventListener('click', () => {
+            const isPassword = passwordInput.type === 'password';
+            passwordInput.type = isPassword ? 'text' : 'password';
+            eyeIcon.className = isPassword ? 'fa-regular fa-eye-slash text-sm' : 'fa-regular fa-eye text-sm';
+        });
+
+        // Form Submission
+        const loginForm = document.getElementById('login-form');
+        const submitBtn = document.getElementById('submit-btn');
+        const btnText = document.getElementById('btn-text');
+        const btnSpinner = document.getElementById('btn-spinner');
+        const alertBox = document.getElementById('alert-box');
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+
+            // UI loading state
+            btnText.textContent = 'Signing In...';
+            btnSpinner.classList.remove('hidden');
+            submitBtn.disabled = true;
+            alertBox.classList.add('hidden');
+
+            const result = await auth.login(email, password);
+
+            if (result.success) {
+                alertBox.className = 'mb-6 p-4 rounded-xl text-sm bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center';
+                alertBox.innerHTML = `<i class="fa-solid fa-circle-check mr-2 text-emerald-600"></i> Welcome, ${result.user.name} (${result.user.role})! Redirecting...`;
+                alertBox.classList.remove('hidden');
+
+                setTimeout(() => {
+                    window.location.href = auth.getDashboardPath(result.user.role);
+                }, 700);
+            } else {
+                alertBox.className = 'mb-6 p-4 rounded-xl text-sm bg-rose-50 text-rose-800 border border-rose-200 flex items-center';
+                alertBox.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-2 text-rose-600"></i> ${result.error}`;
+                alertBox.classList.remove('hidden');
+
+                btnText.textContent = `Sign In as ${currentSelectedRole.charAt(0) + currentSelectedRole.slice(1).toLowerCase()}`;
+                btnSpinner.classList.add('hidden');
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

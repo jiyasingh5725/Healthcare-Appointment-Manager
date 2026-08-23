@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clinical Consultation & Case Review - CareSync</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col font-sans">
+
+    <!-- Top Navigation -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-6">
+                <a href="dashboard.html" class="flex items-center space-x-2.5 text-teal-600 font-extrabold text-xl">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-teal-600 to-sky-500 flex items-center justify-center text-white text-base shadow-sm">
+                        <i class="fa-solid fa-user-doctor"></i>
+                    </div>
+                    <span>CareSync <span class="text-xs font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-md border border-teal-200">Doctor</span></span>
+                </a>
+                <nav class="hidden md:flex items-center space-x-1 text-sm font-medium">
+                    <a href="dashboard.html" class="px-3.5 py-2 text-slate-600 hover:text-teal-600 hover:bg-slate-50 rounded-xl transition-colors flex items-center">
+                        <i class="fa-solid fa-gauge mr-2"></i> Dashboard
+                    </a>
+                    <a href="appointments.html" class="px-3.5 py-2 text-teal-600 bg-teal-50 rounded-xl font-semibold flex items-center">
+                        <i class="fa-solid fa-calendar-check mr-2"></i> Consultations
+                    </a>
+                    <a href="profile.html" class="px-3.5 py-2 text-slate-600 hover:text-teal-600 hover:bg-slate-50 rounded-xl transition-colors flex items-center">
+                        <i class="fa-solid fa-user-gear mr-2"></i> Clinical Profile
+                    </a>
+                </nav>
+            </div>
+
+            <div class="flex items-center space-x-4">
+                <a href="appointments.html" class="px-3.5 py-2 text-xs font-semibold text-slate-700 hover:text-teal-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors flex items-center">
+                    <i class="fa-solid fa-arrow-left mr-1.5"></i> Back to Consultations
+                </a>
+                <button onclick="auth.logout('../login.html')" class="px-3 py-1.5 text-xs font-semibold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-xl border border-rose-200 transition-colors">
+                    Logout
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow space-y-6">
+        
+        <!-- Breadcrumb -->
+        <nav class="flex items-center space-x-2 text-xs text-slate-500 mb-2">
+            <a href="dashboard.html" class="hover:text-teal-600">Doctor Portal</a>
+            <i class="fa-solid fa-chevron-right text-2xs text-slate-400"></i>
+            <a href="appointments.html" class="hover:text-teal-600">Consultations</a>
+            <i class="fa-solid fa-chevron-right text-2xs text-slate-400"></i>
+            <span class="text-slate-800 font-semibold">Case Details</span>
+        </nav>
+
+        <!-- Loader -->
+        <div id="loader" class="py-16 text-center text-slate-400">
+            <i class="fa-solid fa-circle-notch fa-spin text-2xl text-teal-500 mb-2"></i>
+            <p class="text-xs">Loading patient consultation record...</p>
+        </div>
+
+        <!-- Alert Notification Box -->
+        <div id="alert-box" class="hidden p-4 rounded-2xl text-sm"></div>
+
+        <!-- Consultation Case Container -->
+        <div id="case-card" class="hidden space-y-6">
+            
+            <!-- Hero Header Card -->
+            <div class="bg-gradient-to-r from-teal-800 via-teal-700 to-sky-800 rounded-3xl p-6 sm:p-8 text-white shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <span id="app-ref-id" class="inline-block px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-mono font-bold tracking-wider mb-2">
+                        #APT-00000
+                    </span>
+                    <h1 class="text-2xl font-extrabold tracking-tight">Clinical Consultation Case</h1>
+                    <p class="text-xs text-teal-100 mt-0.5">Patient clinical record and session workflow</p>
+                </div>
+                <div id="app-status-badge"></div>
+            </div>
+
+            <!-- Patient Profile & Schedule Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <!-- Patient Info -->
+                <div class="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm space-y-3">
+                    <h3 class="text-2xs font-bold uppercase tracking-wider text-slate-400 flex items-center">
+                        <i class="fa-solid fa-user text-teal-600 mr-2 text-xs"></i> Patient Profile
+                    </h3>
+                    <div class="flex items-center space-x-3.5 pt-1">
+                        <div class="w-12 h-12 rounded-2xl bg-teal-50 text-teal-700 flex items-center justify-center text-lg font-bold">
+                            <i class="fa-solid fa-user-injured"></i>
+                        </div>
+                        <div>
+                            <h4 id="patient-name" class="font-bold text-slate-900 text-base">Patient Name</h4>
+                            <p id="patient-email" class="text-xs text-slate-500">patient@example.com</p>
+                            <p id="patient-phone" class="text-2xs text-teal-600 font-semibold mt-0.5">None provided</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Schedule Window -->
+                <div class="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm space-y-3">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-2xs font-bold uppercase tracking-wider text-slate-400 flex items-center">
+                            <i class="fa-regular fa-clock text-teal-600 mr-2 text-xs"></i> Consultation Schedule
+                        </h3>
+                        <button onclick="downloadCalendarInvite()" class="inline-flex items-center px-2.5 py-1 bg-teal-50 hover:bg-teal-100 text-teal-700 rounded-xl text-2xs font-bold border border-teal-200 transition-all">
+                            <i class="fa-regular fa-calendar-plus mr-1 text-teal-600"></i> Add to Calendar (.ics)
+                        </button>
+                    </div>
+                    <div class="space-y-1 pt-1">
+                        <p class="text-xs text-slate-500">Scheduled Date:</p>
+                        <p id="app-date" class="text-sm font-bold text-slate-900">YYYY-MM-DD</p>
+                        <p class="text-xs text-slate-500 pt-1">Time Slot Interval:</p>
+                        <p id="app-time" class="text-sm font-bold text-teal-700">00:00 – 00:00</p>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Reported Symptoms / Reason for Consultation Card -->
+            <div class="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm space-y-3">
+                <h3 class="text-2xs font-bold uppercase tracking-wider text-slate-400 flex items-center">
+                    <i class="fa-solid fa-notes-medical text-teal-600 mr-2 text-xs"></i> Reported Symptoms & Reason for Visit
+                </h3>
+                <div id="symptoms-container" class="p-4 rounded-2xl bg-teal-50/50 border border-teal-100 text-xs text-slate-800 leading-relaxed font-medium">
+                    <span class="text-slate-400 italic">No symptoms or clinical notes reported by patient.</span>
+                </div>
+            </div>
+
+            <!-- AI-Generated Pre-Visit Summary Card (Decision Support) -->
+            <div class="bg-gradient-to-br from-indigo-900 via-slate-900 to-teal-950 rounded-3xl p-6 sm:p-8 text-white shadow-xl space-y-6 relative overflow-hidden border border-indigo-500/30">
+                
+                <!-- Card Header -->
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-500 to-teal-400 flex items-center justify-center text-white text-base shadow-md">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        </div>
+                        <div>
+                            <div class="flex items-center space-x-2">
+                                <h3 class="text-base sm:text-lg font-extrabold tracking-tight text-white">AI-Generated Pre-Visit Summary</h3>
+                                <span class="px-2.5 py-0.5 rounded-full text-2xs font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-400/30">Decision Support</span>
+                            </div>
+                            <p class="text-2xs text-slate-300 mt-0.5">Automated symptom synthesis & diagnostic inquiry suggestions</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-3">
+                        <div id="ai-urgency-badge" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-300 border border-slate-700">
+                            Analyzing...
+                        </div>
+                        <button type="button" onclick="generateAiSummary()" id="ai-refresh-btn" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-bold transition-all flex items-center border border-white/10 shadow-2xs">
+                            <i class="fa-solid fa-rotate-right mr-1.5 text-xs" id="ai-refresh-spinner"></i> Refresh
+                        </button>
+                    </div>
+                </div>
+
+                <!-- AI Summary Content Container -->
+                <div id="ai-summary-content" class="space-y-5">
+                    
+                    <!-- Chief Complaint -->
+                    <div class="bg-white/5 backdrop-blur-md rounded-2xl p-4 border border-white/10 space-y-1">
+                        <div class="text-2xs font-bold uppercase tracking-wider text-indigo-300 flex items-center">
+                            <i class="fa-solid fa-stethoscope mr-1.5"></i> Chief Clinical Complaint
+                        </div>
+                        <p id="ai-chief-complaint" class="text-sm font-semibold text-slate-100">
+                            Loading AI symptom analysis...
+                        </p>
+                    </div>
+
+                    <!-- 3 Suggested Questions -->
+                    <div class="space-y-2.5">
+                        <div class="text-2xs font-bold uppercase tracking-wider text-indigo-300 flex items-center">
+                            <i class="fa-solid fa-clipboard-question mr-1.5"></i> Suggested Clarifying Questions for Doctor
+                        </div>
+                        <div id="ai-questions-list" class="space-y-2">
+                            <div class="p-3 bg-white/5 rounded-xl border border-white/10 text-xs text-slate-300 animate-pulse">
+                                Loading clinical questions...
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Mandatory Clinical Disclaimer -->
+                <div class="pt-3 border-t border-white/10 flex items-center justify-between text-2xs text-slate-400">
+                    <span class="flex items-center">
+                        <i class="fa-solid fa-shield-halved mr-1.5 text-indigo-400"></i>
+                        <strong>Notice:</strong>&nbsp;AI-generated decision-support triage only; not a clinical diagnosis.
+                    </span>
+                    <span id="ai-model-tag" class="font-mono text-slate-500 text-3xs">Model: gemini-1.5-flash</span>
+                </div>
+
+            </div>
+
+            <!-- Doctor Post-Visit Consultation & Prescription Workspace -->
+            <div class="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-8 shadow-sm space-y-6">
+
+                <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+                    <div>
+                        <h3 class="text-base sm:text-lg font-extrabold text-slate-900 flex items-center">
+                            <i class="fa-solid fa-file-prescription text-teal-600 mr-2 text-lg"></i>
+                            Clinical Consultation & Prescription
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Submit clinical observations, diagnosis, pharmaceutical prescriptions, and follow-up advice</p>
+                    </div>
+                    <span id="consultation-status-pill" class="px-3 py-1 rounded-full bg-teal-50 text-teal-700 text-2xs font-bold border border-teal-200">
+                        Active Workspace
+                    </span>
+                </div>
+
+                <!-- Form Mode -->
+                <form id="consultation-form" onsubmit="handlePrescriptionSubmit(event)" class="space-y-6">
+                    
+                    <!-- Clinical Notes -->
+                    <div>
+                        <label for="clinical-notes" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                            Clinical Observations & Diagnosis *
+                        </label>
+                        <textarea id="clinical-notes" rows="3" required placeholder="Enter clinical assessment, physical exam observations, primary diagnosis, or medical findings..."
+                            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-teal-500 focus:bg-white focus:outline-none transition-all"></textarea>
+                    </div>
+
+                    <!-- Prescribed Medications Section -->
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                                <i class="fa-solid fa-pills text-teal-600 mr-1.5"></i> Prescribed Medications
+                            </label>
+                            <button type="button" onclick="addMedicationRow()" class="px-3 py-1.5 bg-teal-50 hover:bg-teal-100 text-teal-800 rounded-xl text-xs font-bold border border-teal-200 transition-colors flex items-center">
+                                <i class="fa-solid fa-plus mr-1.5"></i> Add Medication
+                            </button>
+                        </div>
+
+                        <!-- Medication Items Container -->
+                        <div id="medications-container" class="space-y-3">
+                            <!-- Dynamic rows will be inserted here -->
+                        </div>
+                    </div>
+
+                    <!-- Follow-up Instructions -->
+                    <div>
+                        <label for="follow-up-notes" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                            Follow-up Advice & Review Timeline
+                        </label>
+                        <textarea id="follow-up-notes" rows="2" placeholder="e.g. Schedule review in 7 days if symptoms persist. Avoid strenuous activities..."
+                            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-teal-500 focus:bg-white focus:outline-none transition-all"></textarea>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div class="text-2xs text-slate-400 flex items-center">
+                            <i class="fa-solid fa-lock text-slate-400 mr-1.5"></i> Submitting will mark this appointment as Completed
+                        </div>
+
+                        <div class="flex items-center space-x-3 w-full sm:w-auto justify-end">
+                            <button type="button" onclick="updateStatus('CANCELLED')" id="btn-cancel" class="px-4 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-xl text-xs font-bold border border-rose-200 transition-colors">
+                                Cancel Appointment
+                            </button>
+                            <button type="submit" id="btn-submit-prescription" class="px-6 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-xs font-bold shadow-md transition-all flex items-center">
+                                <i class="fa-solid fa-check mr-1.5"></i> Submit Consultation & Issue Prescription
+                            </button>
+                        </div>
+                    </div>
+
+                </form>
+
+                <!-- Issued Prescription Receipt View (Hidden until submitted or when viewing completed) -->
+                <div id="issued-prescription-card" class="hidden bg-slate-50 rounded-2xl p-6 border border-slate-200/80 space-y-5">
+                    <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+                        <div class="flex items-center space-x-2">
+                            <span class="w-8 h-8 rounded-xl bg-teal-600 text-white flex items-center justify-center text-sm font-bold">Rx</span>
+                            <div>
+                                <h4 class="font-bold text-slate-900 text-sm">Official Clinical Prescription</h4>
+                                <p id="rx-date" class="text-2xs text-slate-500">Issued on: --</p>
+                            </div>
+                        </div>
+                        <button type="button" onclick="enableEditPrescription()" class="px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-semibold border border-slate-200 shadow-2xs">
+                            <i class="fa-solid fa-pen-to-square mr-1"></i> Edit Prescription
+                        </button>
+                    </div>
+
+                    <div>
+                        <p class="text-2xs font-bold uppercase tracking-wider text-slate-400">Clinical Diagnosis & Findings:</p>
+                        <p id="rx-notes" class="text-xs text-slate-800 mt-1 font-medium bg-white p-3 rounded-xl border border-slate-200/60 leading-relaxed"></p>
+                    </div>
+
+                    <div>
+                        <p class="text-2xs font-bold uppercase tracking-wider text-slate-400 mb-2">Prescribed Pharmaceuticals:</p>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-slate-200 text-xs bg-white rounded-xl border border-slate-200/60 overflow-hidden">
+                                <thead class="bg-slate-100/70 text-slate-600 font-bold text-2xs uppercase">
+                                    <tr>
+                                        <th class="px-4 py-2.5 text-left">Medication</th>
+                                        <th class="px-4 py-2.5 text-left">Dosage</th>
+                                        <th class="px-4 py-2.5 text-left">Frequency</th>
+                                        <th class="px-4 py-2.5 text-left">Duration</th>
+                                        <th class="px-4 py-2.5 text-left">Instructions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="rx-medications-table" class="divide-y divide-slate-100"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div id="rx-follow-up-container">
+                        <p class="text-2xs font-bold uppercase tracking-wider text-slate-400">Follow-up Advice:</p>
+                        <p id="rx-follow-up" class="text-xs text-slate-800 mt-1 font-medium bg-white p-3 rounded-xl border border-slate-200/60 leading-relaxed"></p>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500 mt-auto">
+        © 2026 CareSync Healthcare Appointment Manager. Doctor Protected Portal.
+    </footer>
+
+    <!-- Scripts -->
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const appId = urlParams.get('id');
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const user = await auth.requireAuth('DOCTOR', '../');
+            if (!user) return;
+
+            if (!appId) {
+                alert('No appointment ID provided');
+                window.location.href = 'appointments.html';
+                return;
+            }
+
+            loadAppointmentDetails();
+        });
+
+        async function loadAppointmentDetails() {
+            const loader = document.getElementById('loader');
+            const card = document.getElementById('case-card');
+
+            const res = await api.get(`/api/appointments/${appId}`);
+            loader.classList.add('hidden');
+
+            if (res.success && res.data) {
+                const app = res.data;
+                card.classList.remove('hidden');
+
+                document.getElementById('app-ref-id').textContent = `#APT-${String(app.id).padStart(5, '0')}`;
+                document.getElementById('patient-name').textContent = app.patient_name;
+                document.getElementById('patient-email').textContent = app.patient_email;
+                document.getElementById('patient-phone').textContent = app.patient_phone || 'None provided';
+                document.getElementById('app-date').textContent = app.appointment_date;
+                document.getElementById('app-time').textContent = `${app.start_time.substring(0, 5)} – ${app.end_time.substring(0, 5)}`;
+
+                // Symptoms
+                const symptomsContainer = document.getElementById('symptoms-container');
+                if (app.symptoms && app.symptoms.trim()) {
+                    symptomsContainer.innerHTML = `<p class="text-slate-900">${app.symptoms}</p>`;
+                } else {
+                    symptomsContainer.innerHTML = `<span class="text-slate-400 italic">No symptoms or clinical notes reported by patient.</span>`;
+                }
+
+                // Badge
+                const badge = document.getElementById('app-status-badge');
+                if (app.status === 'CONFIRMED') {
+                    badge.innerHTML = '<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-emerald-500 text-white shadow-sm"><i class="fa-solid fa-circle-check mr-1.5"></i> Confirmed</span>';
+                } else if (app.status === 'COMPLETED') {
+                    badge.innerHTML = '<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-sky-500 text-white shadow-sm"><i class="fa-solid fa-check-double mr-1.5"></i> Completed</span>';
+                    document.getElementById('btn-complete').disabled = true;
+                    document.getElementById('btn-complete').className = 'px-6 py-2.5 bg-slate-200 text-slate-400 rounded-xl text-xs font-bold cursor-not-allowed';
+                } else if (app.status === 'CANCELLED') {
+                    badge.innerHTML = '<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-rose-500 text-white shadow-sm"><i class="fa-solid fa-ban mr-1.5"></i> Cancelled</span>';
+                } else {
+                    badge.innerHTML = `<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-slate-500 text-white">${app.status}</span>`;
+                }
+
+                // Load AI Pre-visit Summary
+                loadAiSummary();
+
+                // Load Clinical Prescription if already issued
+                loadPrescription();
+
+            } else {
+                loader.innerHTML = `
+                    <div class="text-rose-600 font-semibold mb-3">${res.error || 'Appointment record not found or unauthorized access'}</div>
+                    <a href="appointments.html" class="px-4 py-2 bg-teal-600 text-white rounded-xl text-xs font-semibold">Return to Consultations</a>
+                `;
+                loader.classList.remove('hidden');
+            }
+        }
+
+        let medCount = 0;
+
+        function addMedicationRow(data = {}) {
+            medCount++;
+            const container = document.getElementById('medications-container');
+            const rowId = `med-row-${medCount}`;
+
+            const rowHtml = `
+                <div id="${rowId}" class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-3 transition-all relative">
+                    <div class="flex items-center justify-between">
+                        <span class="text-2xs font-bold uppercase tracking-wider text-slate-500 flex items-center">
+                            <i class="fa-solid fa-capsules text-teal-600 mr-1.5"></i> Medicine #${medCount}
+                        </span>
+                        <button type="button" onclick="removeMedicationRow('${rowId}')" class="text-rose-600 hover:text-rose-700 text-xs font-semibold px-2 py-0.5 rounded-lg hover:bg-rose-50 transition-colors">
+                            <i class="fa-solid fa-trash mr-1"></i> Remove
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                        <div>
+                            <label class="block text-3xs font-bold uppercase text-slate-500 mb-1">Medication Name *</label>
+                            <input type="text" required placeholder="e.g. Amoxicillin" value="${data.medication_name || ''}" class="med-name w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-teal-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-3xs font-bold uppercase text-slate-500 mb-1">Dosage *</label>
+                            <input type="text" required placeholder="e.g. 500mg / 10ml" value="${data.dosage || ''}" class="med-dosage w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-teal-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-3xs font-bold uppercase text-slate-500 mb-1">Frequency *</label>
+                            <input type="text" required placeholder="e.g. Twice daily" value="${data.frequency || ''}" class="med-freq w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-teal-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-3xs font-bold uppercase text-slate-500 mb-1">Duration *</label>
+                            <input type="text" required placeholder="e.g. 7 days" value="${data.duration || ''}" class="med-duration w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-teal-500 focus:outline-none">
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row items-center gap-3 pt-1">
+                        <div class="flex-grow w-full">
+                            <input type="text" placeholder="Patient instructions (e.g. Take with meals and plenty of water)" value="${data.instructions || ''}" class="med-instructions w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-teal-500 focus:outline-none">
+                        </div>
+                        <label class="flex items-center space-x-2 text-xs text-slate-700 whitespace-nowrap cursor-pointer select-none">
+                            <input type="checkbox" ${data.reminder_enabled !== false ? 'checked' : ''} class="med-reminder rounded text-teal-600 focus:ring-teal-500 h-4 w-4">
+                            <span class="font-medium">Enable Reminders</span>
+                        </label>
+                    </div>
+                </div>
+            `;
+
+            container.insertAdjacentHTML('beforeend', rowHtml);
+        }
+
+        function removeMedicationRow(rowId) {
+            const row = document.getElementById(rowId);
+            if (row) row.remove();
+        }
+
+        async function handlePrescriptionSubmit(e) {
+            e.preventDefault();
+
+            const notes = document.getElementById('clinical-notes').value.trim();
+            const followUp = document.getElementById('follow-up-notes').value.trim();
+            const submitBtn = document.getElementById('btn-submit-prescription');
+            const alertBox = document.getElementById('alert-box');
+
+            if (!notes) {
+                alert('Please enter clinical observations / diagnosis.');
+                return;
+            }
+
+            // Collect medications
+            const medContainers = document.querySelectorAll('#medications-container > div');
+            const medications = [];
+
+            for (const container of medContainers) {
+                const name = container.querySelector('.med-name')?.value.trim();
+                const dosage = container.querySelector('.med-dosage')?.value.trim();
+                const freq = container.querySelector('.med-freq')?.value.trim();
+                const duration = container.querySelector('.med-duration')?.value.trim();
+                const instructions = container.querySelector('.med-instructions')?.value.trim();
+                const reminder = container.querySelector('.med-reminder')?.checked;
+
+                if (!name || !dosage || !freq || !duration) {
+                    alert('Please fill in all required medication fields (Name, Dosage, Frequency, Duration) or remove the empty row.');
+                    return;
+                }
+
+                medications.push({
+                    medication_name: name,
+                    dosage,
+                    frequency: freq,
+                    duration,
+                    instructions: instructions || null,
+                    reminder_enabled: !!reminder
+                });
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-1.5"></i> Submitting...';
+
+            const payload = {
+                notes,
+                follow_up_instructions: followUp || null,
+                medications
+            };
+
+            const res = await api.post(`/api/appointments/${appId}/prescription`, payload);
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fa-solid fa-check mr-1.5"></i> Submit Consultation & Issue Prescription';
+
+            if (res.success && res.data) {
+                alertBox.className = 'p-4 rounded-2xl text-sm bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center shadow-sm';
+                alertBox.innerHTML = '<i class="fa-solid fa-circle-check mr-2 text-emerald-600 text-lg"></i> Consultation completed and official prescription issued successfully!';
+                alertBox.classList.remove('hidden');
+
+                loadAppointmentDetails();
+                loadPrescription();
+            } else {
+                alertBox.className = 'p-4 rounded-2xl text-sm bg-rose-50 text-rose-800 border border-rose-200 flex items-center shadow-sm';
+                alertBox.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-2 text-rose-600 text-lg"></i> ${res.error || 'Failed to submit prescription'}`;
+                alertBox.classList.remove('hidden');
+            }
+        }
+
+        async function loadPrescription() {
+            const res = await api.get(`/api/appointments/${appId}/prescription`);
+            if (res.success && res.data) {
+                renderPrescriptionReceipt(res.data);
+            }
+        }
+
+        function renderPrescriptionReceipt(rx) {
+            const receiptCard = document.getElementById('issued-prescription-card');
+            const form = document.getElementById('consultation-form');
+            const pill = document.getElementById('consultation-status-pill');
+
+            receiptCard.classList.remove('hidden');
+            form.classList.add('hidden');
+            pill.textContent = 'Completed & Issued';
+            pill.className = 'px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-2xs font-bold border border-emerald-200';
+
+            document.getElementById('rx-date').textContent = `Issued on: ${rx.created_at ? new Date(rx.created_at).toLocaleString() : 'N/A'}`;
+            document.getElementById('rx-notes').textContent = rx.notes || 'No clinical notes provided.';
+
+            const medsTable = document.getElementById('rx-medications-table');
+            if (rx.medications && rx.medications.length > 0) {
+                medsTable.innerHTML = rx.medications.map(m => `
+                    <tr class="hover:bg-slate-50/80">
+                        <td class="px-4 py-2.5 font-bold text-slate-900">${m.medication_name}</td>
+                        <td class="px-4 py-2.5 font-semibold text-teal-700">${m.dosage}</td>
+                        <td class="px-4 py-2.5 text-slate-700">${m.frequency}</td>
+                        <td class="px-4 py-2.5 text-slate-700">${m.duration}</td>
+                        <td class="px-4 py-2.5 text-slate-500 italic">${m.instructions || 'Standard usage'}</td>
+                    </tr>
+                `).join('');
+            } else {
+                medsTable.innerHTML = `<tr><td colspan="5" class="px-4 py-3 text-center text-slate-400 italic">No prescription pharmaceuticals issued.</td></tr>`;
+            }
+
+            const followUpContainer = document.getElementById('rx-follow-up-container');
+            if (rx.follow_up_instructions) {
+                document.getElementById('rx-follow-up').textContent = rx.follow_up_instructions;
+                followUpContainer.classList.remove('hidden');
+            } else {
+                followUpContainer.classList.add('hidden');
+            }
+        }
+
+        function enableEditPrescription() {
+            document.getElementById('issued-prescription-card').classList.add('hidden');
+            document.getElementById('consultation-form').classList.remove('hidden');
+        }
+
+        async function loadAiSummary() {
+            const res = await api.get(`/api/appointments/${appId}/previsit-summary`);
+            if (res.success && res.data) {
+                renderAiSummaryData(res.data);
+            } else {
+                document.getElementById('ai-chief-complaint').textContent = 'No pre-visit summary generated yet. Click "Refresh" to analyze.';
+                document.getElementById('ai-questions-list').innerHTML = `
+                    <div class="p-3 bg-white/5 rounded-xl border border-white/10 text-xs text-slate-400">
+                        Click "Refresh" above to generate AI pre-visit clinical triage questions.
+                    </div>
+                `;
+            }
+        }
+
+        async function generateAiSummary() {
+            const spinner = document.getElementById('ai-refresh-spinner');
+            const refreshBtn = document.getElementById('ai-refresh-btn');
+            if (spinner) spinner.classList.add('fa-spin');
+            if (refreshBtn) refreshBtn.disabled = true;
+
+            const res = await api.post(`/api/appointments/${appId}/previsit-summary`, {});
+            if (spinner) spinner.classList.remove('fa-spin');
+            if (refreshBtn) refreshBtn.disabled = false;
+
+            if (res.success && res.data) {
+                renderAiSummaryData(res.data);
+            } else {
+                alert(`AI Generation Notice: ${res.error || 'Failed to synthesize summary'}`);
+            }
+        }
+
+        function renderAiSummaryData(summary) {
+            const urgencyEl = document.getElementById('ai-urgency-badge');
+            const urgency = summary.urgency_level || 'Medium';
+
+            if (urgency === 'High') {
+                urgencyEl.className = 'inline-flex items-center px-3 py-1 rounded-full text-xs font-extrabold bg-rose-500/20 text-rose-300 border border-rose-500/40 shadow-sm';
+                urgencyEl.innerHTML = '<span class="w-2 h-2 mr-1.5 rounded-full bg-rose-400 animate-ping"></span>High Priority';
+            } else if (urgency === 'Medium') {
+                urgencyEl.className = 'inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40';
+                urgencyEl.innerHTML = '<span class="w-2 h-2 mr-1.5 rounded-full bg-amber-400"></span>Medium Priority';
+            } else {
+                urgencyEl.className = 'inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
+                urgencyEl.innerHTML = '<span class="w-2 h-2 mr-1.5 rounded-full bg-emerald-400"></span>Low Priority';
+            }
+
+            document.getElementById('ai-chief-complaint').textContent = summary.chief_complaint || 'General consultation review';
+
+            const questionsList = document.getElementById('ai-questions-list');
+            const questions = summary.suggested_questions || [];
+
+            if (questions.length > 0) {
+                questionsList.innerHTML = questions.map((q, idx) => `
+                    <div class="p-3 bg-white/5 hover:bg-white/10 rounded-2xl border border-white/10 text-xs text-slate-200 flex items-start justify-between gap-3 transition-colors">
+                        <div class="flex items-start">
+                            <span class="w-5 h-5 rounded-full bg-indigo-500/30 text-indigo-300 font-bold text-2xs flex items-center justify-center mr-2.5 mt-0.5 flex-shrink-0">
+                                ${idx + 1}
+                            </span>
+                            <span class="leading-relaxed font-medium">${q}</span>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                questionsList.innerHTML = '<div class="text-xs text-slate-400 italic">No specific questions suggested.</div>';
+            }
+
+            const modelTag = document.getElementById('ai-model-tag');
+            if (modelTag) {
+                modelTag.textContent = `Model: ${summary.model_name} [${summary.status}]`;
+            }
+        }
+
+        async function updateStatus(targetStatus) {
+            const confirmMsg = targetStatus === 'COMPLETED' 
+                ? 'Mark this consultation encounter as completed?' 
+                : 'Are you sure you want to cancel this appointment?';
+
+            if (!confirm(confirmMsg)) return;
+
+            const alertBox = document.getElementById('alert-box');
+            alertBox.classList.add('hidden');
+
+            const res = await api.patch(`/api/doctor/appointments/${appId}/status`, {
+                status: targetStatus
+            });
+
+            if (res.success && res.data) {
+                alertBox.className = 'p-4 rounded-2xl text-sm bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center';
+                alertBox.innerHTML = `<i class="fa-solid fa-circle-check mr-2 text-emerald-600 text-lg"></i> Consultation status updated to <strong>${targetStatus}</strong>!`;
+                alertBox.classList.remove('hidden');
+
+                loadAppointmentDetails();
+            } else {
+                alertBox.className = 'p-4 rounded-2xl text-sm bg-rose-50 text-rose-800 border border-rose-200 flex items-center';
+                alertBox.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-2 text-rose-600 text-lg"></i> ${res.error || 'Failed to update consultation status'}`;
+                alertBox.classList.remove('hidden');
+            }
+        }
+
+        async function downloadCalendarInvite() {
+            const token = localStorage.getItem('access_token');
+            if (!token || !appId) return;
+            try {
+                const response = await fetch(`${api.baseUrl}/api/appointments/${appId}/calendar-invite`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!response.ok) {
+                    alert('Could not download calendar invite.');
+                    return;
+                }
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `caresync-appointment-${appId}.ics`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                a.remove();
+            } catch (err) {
+                console.error('Error downloading iCal:', err);
+                alert('Failed to download calendar invite.');
+            }
+        }
+    </script>
+</body>
+</html>
+
+

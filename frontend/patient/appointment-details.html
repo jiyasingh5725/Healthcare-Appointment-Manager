@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consultation Details - CareSync</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col font-sans">
+
+    <!-- Top Navigation -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-6">
+                <a href="dashboard.html" class="flex items-center space-x-2.5 text-sky-600 font-extrabold text-xl">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-sky-600 to-teal-500 flex items-center justify-center text-white text-base shadow-sm">
+                        <i class="fa-solid fa-heart-pulse"></i>
+                    </div>
+                    <span>CareSync</span>
+                </a>
+                <nav class="hidden md:flex items-center space-x-1 text-sm font-medium">
+                    <a href="dashboard.html" class="px-3.5 py-2 text-slate-600 hover:text-sky-600 hover:bg-slate-50 rounded-xl transition-colors flex items-center">
+                        <i class="fa-solid fa-gauge mr-2"></i> Dashboard
+                    </a>
+                    <a href="doctors.html" class="px-3.5 py-2 text-slate-600 hover:text-sky-600 hover:bg-slate-50 rounded-xl transition-colors flex items-center">
+                        <i class="fa-solid fa-user-doctor mr-2"></i> Find Doctors
+                    </a>
+                    <a href="book-appointment.html" class="px-3.5 py-2 text-slate-600 hover:text-sky-600 hover:bg-slate-50 rounded-xl transition-colors flex items-center">
+                        <i class="fa-solid fa-calendar-plus mr-2"></i> Book Appointment
+                    </a>
+                    <a href="appointments.html" class="px-3.5 py-2 text-sky-600 bg-sky-50 rounded-xl font-semibold flex items-center">
+                        <i class="fa-solid fa-calendar-check mr-2"></i> My Appointments
+                    </a>
+                </nav>
+            </div>
+
+            <div class="flex items-center space-x-4">
+                <a href="appointments.html" class="px-3.5 py-2 text-xs font-semibold text-slate-700 hover:text-sky-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors flex items-center">
+                    <i class="fa-solid fa-arrow-left mr-1.5"></i> Back to Appointments
+                </a>
+                <button onclick="auth.logout('../login.html')" class="px-3 py-1.5 text-xs font-semibold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-xl border border-rose-200 transition-colors">
+                    Logout
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow space-y-6">
+        
+        <!-- Breadcrumb -->
+        <nav class="flex items-center space-x-2 text-xs text-slate-500 mb-2">
+            <a href="dashboard.html" class="hover:text-sky-600">Patient Portal</a>
+            <i class="fa-solid fa-chevron-right text-2xs text-slate-400"></i>
+            <a href="appointments.html" class="hover:text-sky-600">Appointments</a>
+            <i class="fa-solid fa-chevron-right text-2xs text-slate-400"></i>
+            <span class="text-slate-800 font-semibold">Consultation Receipt</span>
+        </nav>
+
+        <!-- Loader -->
+        <div id="loader" class="py-16 text-center text-slate-400">
+            <i class="fa-solid fa-circle-notch fa-spin text-2xl text-sky-500 mb-2"></i>
+            <p class="text-xs">Loading consultation record...</p>
+        </div>
+
+        <!-- Appointment Card -->
+        <div id="details-card" class="hidden bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden">
+            
+            <!-- Card Header -->
+            <div class="bg-gradient-to-r from-sky-700 via-sky-600 to-teal-600 p-6 sm:p-8 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <span id="app-ref-id" class="inline-block px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-mono font-bold tracking-wider mb-2">
+                        #APT-00000
+                    </span>
+                    <h1 class="text-2xl font-extrabold tracking-tight">Medical Consultation Record</h1>
+                    <p class="text-xs text-sky-100 mt-0.5">Clinical appointment reservation details</p>
+                </div>
+                <div id="app-status-badge"></div>
+            </div>
+
+            <!-- Card Body -->
+            <div class="p-6 sm:p-8 space-y-6">
+                
+                <!-- Doctor Information -->
+                <div>
+                    <h3 class="text-2xs font-bold uppercase tracking-wider text-slate-400 mb-2 flex items-center">
+                        <i class="fa-solid fa-user-doctor text-sky-600 mr-2 text-xs"></i> Attending Physician
+                    </h3>
+                    <div class="bg-slate-50 rounded-2xl p-4 border border-slate-100 flex items-center space-x-4">
+                        <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-sky-600 to-teal-600 text-white flex items-center justify-center font-bold text-lg shadow-sm">
+                            <i class="fa-solid fa-stethoscope"></i>
+                        </div>
+                        <div>
+                            <h4 id="doctor-name" class="font-bold text-slate-900 text-base">Dr. Name</h4>
+                            <p id="doctor-spec" class="text-xs text-sky-700 font-semibold">Specialization</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Consultation Schedule -->
+                <div class="pt-4 border-t border-slate-100">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-2xs font-bold uppercase tracking-wider text-slate-400 flex items-center">
+                            <i class="fa-regular fa-calendar-check text-sky-600 mr-2 text-xs"></i> Schedule & Time Window
+                        </h3>
+                        <button onclick="downloadCalendarInvite()" class="inline-flex items-center px-3 py-1 bg-sky-50 hover:bg-sky-100 text-sky-700 rounded-xl text-2xs font-bold border border-sky-200 transition-all shadow-xs">
+                            <i class="fa-regular fa-calendar-plus mr-1.5 text-sky-600"></i> Add to Calendar (.ics)
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                            <span class="text-2xs text-slate-400 font-semibold uppercase tracking-wider">Date</span>
+                            <p id="app-date" class="text-sm font-bold text-slate-900 mt-0.5">YYYY-MM-DD</p>
+                        </div>
+                        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                            <span class="text-2xs text-slate-400 font-semibold uppercase tracking-wider">Time Window</span>
+                            <p id="app-time" class="text-sm font-bold text-slate-900 mt-0.5">00:00 – 00:00</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Symptoms / Reason for Visit -->
+                <div class="pt-4 border-t border-slate-100">
+                    <h3 class="text-2xs font-bold uppercase tracking-wider text-slate-400 mb-2 flex items-center">
+                        <i class="fa-solid fa-notes-medical text-sky-600 mr-2 text-xs"></i> Patient Symptoms / Consultation Reason
+                    </h3>
+                    <div id="symptoms-container" class="p-4 rounded-2xl bg-slate-50 border border-slate-100 text-xs text-slate-700 leading-relaxed">
+                        <span class="text-slate-400 italic">No symptoms or clinical notes provided at booking.</span>
+                    </div>
+                </div>
+
+                <!-- Doctor Clinical Prescription (Shown when available) -->
+                <div id="prescription-section" class="hidden pt-4 border-t border-slate-100 space-y-4">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 rounded-xl bg-teal-600 text-white flex items-center justify-center font-bold text-xs shadow-sm">
+                            Rx
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-900">Clinical Prescription & Post-Visit Advice</h3>
+                            <p class="text-2xs text-slate-400">Prescribed by your attending physician</p>
+                        </div>
+                    </div>
+
+                    <!-- Clinical Findings / Diagnosis -->
+                    <div class="p-4 rounded-2xl bg-teal-50/50 border border-teal-100 space-y-1">
+                        <span class="text-2xs font-bold uppercase tracking-wider text-teal-800">Physician Diagnosis & Clinical Notes:</span>
+                        <p id="rx-patient-notes" class="text-xs text-slate-800 font-medium leading-relaxed"></p>
+                    </div>
+
+                    <!-- Prescribed Medications Table -->
+                    <div class="space-y-2">
+                        <span class="text-2xs font-bold uppercase tracking-wider text-slate-500">Prescribed Medicines:</span>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-slate-200 text-xs bg-slate-50 rounded-2xl border border-slate-200/80 overflow-hidden">
+                                <thead class="bg-slate-100 text-slate-600 font-bold text-2xs uppercase">
+                                    <tr>
+                                        <th class="px-4 py-2.5 text-left">Medicine</th>
+                                        <th class="px-4 py-2.5 text-left">Dosage</th>
+                                        <th class="px-4 py-2.5 text-left">Frequency</th>
+                                        <th class="px-4 py-2.5 text-left">Duration</th>
+                                        <th class="px-4 py-2.5 text-left">Directions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="rx-patient-meds-tbody" class="divide-y divide-slate-100 bg-white"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Follow Up Advice -->
+                    <div id="rx-patient-followup-box" class="p-4 rounded-2xl bg-sky-50 border border-sky-100 text-xs text-slate-800 space-y-1">
+                        <span class="text-2xs font-bold uppercase tracking-wider text-sky-800">Follow-up Instructions:</span>
+                        <p id="rx-patient-followup" class="font-medium text-slate-800"></p>
+                    </div>
+                </div>
+
+                <!-- Patient-Friendly Post-Visit AI Care Summary (Phase 14) -->
+                <div id="ai-postvisit-section" class="hidden pt-4 border-t border-slate-100 space-y-4">
+                    <div class="bg-gradient-to-br from-indigo-900 via-slate-900 to-slate-900 rounded-3xl p-6 sm:p-7 text-white shadow-lg space-y-5 border border-indigo-500/20 relative overflow-hidden">
+                        
+                        <!-- Ambient Glow -->
+                        <div class="absolute -top-16 -right-16 w-48 h-48 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none"></div>
+
+                        <!-- Card Header -->
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4 relative z-10">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-9 h-9 rounded-2xl bg-gradient-to-tr from-indigo-500 to-purple-500 text-white flex items-center justify-center font-bold text-sm shadow-md">
+                                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-base font-extrabold text-white flex items-center">
+                                        Patient Care & Recovery Guide
+                                        <span class="ml-2.5 px-2.5 py-0.5 rounded-full text-3xs font-extrabold bg-indigo-500/30 text-indigo-200 border border-indigo-400/30 uppercase tracking-wider">
+                                            AI-Generated Summary
+                                        </span>
+                                    </h3>
+                                    <p class="text-xs text-slate-300 mt-0.5">Plain-language summary of your doctor visit, medicine schedule & recovery steps</p>
+                                </div>
+                            </div>
+
+                            <button type="button" onclick="refreshAiPostvisitSummary()" id="ai-postvisit-refresh-btn" class="self-start sm:self-auto px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white text-xs font-semibold rounded-xl border border-white/20 transition-all flex items-center shadow-xs">
+                                <i id="ai-postvisit-spinner" class="fa-solid fa-arrows-rotate mr-1.5 text-xs text-indigo-300"></i> Refresh Summary
+                            </button>
+                        </div>
+
+                        <!-- Plain English Visit Summary -->
+                        <div class="space-y-2 relative z-10">
+                            <span class="text-3xs font-bold uppercase tracking-wider text-indigo-300 flex items-center">
+                                <i class="fa-solid fa-comment-medical mr-1.5 text-xs"></i> Doctor Visit Overview
+                            </span>
+                            <div class="p-4 rounded-2xl bg-white/5 border border-white/10 text-xs text-slate-100 font-normal leading-relaxed">
+                                <p id="ai-care-summary-text" class="text-slate-200 text-xs sm:text-sm font-medium leading-relaxed">Synthesizing visit care plan...</p>
+                            </div>
+                        </div>
+
+                        <!-- Medication Schedule Cards / Table -->
+                        <div id="ai-medication-schedule-container" class="space-y-2.5 relative z-10">
+                            <span class="text-3xs font-bold uppercase tracking-wider text-indigo-300 flex items-center">
+                                <i class="fa-solid fa-calendar-days mr-1.5 text-xs"></i> Easy Medication Schedule
+                            </span>
+                            <div id="ai-medication-schedule-list" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <!-- Dynamic Medication Schedule Cards -->
+                            </div>
+                        </div>
+
+                        <!-- Actionable Follow-up Steps -->
+                        <div id="ai-followup-steps-container" class="space-y-2.5 relative z-10">
+                            <span class="text-3xs font-bold uppercase tracking-wider text-indigo-300 flex items-center">
+                                <i class="fa-solid fa-list-check mr-1.5 text-xs"></i> Actionable Next Steps
+                            </span>
+                            <div id="ai-followup-steps-list" class="space-y-2">
+                                <!-- Dynamic Follow-up Step Items -->
+                            </div>
+                        </div>
+
+                        <!-- AI Disclaimer & Model Info -->
+                        <div class="pt-3 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between text-3xs text-slate-400 gap-2 relative z-10">
+                            <div class="flex items-center">
+                                <i class="fa-solid fa-circle-info text-indigo-400 mr-1.5"></i>
+                                <span>Generated by CareSync AI for patient guidance. Does not modify physician orders.</span>
+                            </div>
+                            <span id="ai-postvisit-model-tag" class="font-mono text-slate-500">Model: gemini-1.5-flash</span>
+                        </div>
+
+                    </div>
+                </div>
+
+
+                <!-- Patient Profile -->
+                <div class="pt-4 border-t border-slate-100">
+                    <h3 class="text-2xs font-bold uppercase tracking-wider text-slate-400 mb-2 flex items-center">
+                        <i class="fa-solid fa-user text-sky-600 mr-2 text-xs"></i> Patient Information
+                    </h3>
+                    <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-1.5 text-xs text-slate-700">
+                        <p><strong class="text-slate-900">Name:</strong> <span id="patient-name">Patient Name</span></p>
+                        <p><strong class="text-slate-900">Email:</strong> <span id="patient-email">patient@example.com</span></p>
+                        <p><strong class="text-slate-900">Phone:</strong> <span id="patient-phone">None recorded</span></p>
+                    </div>
+                </div>
+
+                <!-- Booking Meta Timestamps -->
+                <div class="pt-4 border-t border-slate-100 flex flex-col sm:flex-row justify-between text-2xs text-slate-400 gap-2">
+                    <p>Booked on: <span id="created-at" class="font-medium text-slate-600">--</span></p>
+                    <p>Last updated: <span id="updated-at" class="font-medium text-slate-600">--</span></p>
+                </div>
+            </div>
+
+            <!-- Card Footer -->
+            <div class="p-4 border-t border-slate-100 bg-slate-50/50 flex items-center justify-between">
+                <a href="appointments.html" class="px-4 py-2 text-xs font-bold text-slate-700 hover:text-slate-900 bg-slate-200 hover:bg-slate-300 rounded-xl transition-colors">
+                    &larr; Back to Schedule
+                </a>
+                <a href="book-appointment.html" class="px-4 py-2 text-xs font-bold text-white bg-sky-600 hover:bg-sky-700 rounded-xl transition-colors shadow-sm">
+                    Book Another Visit
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500 mt-auto">
+        © 2026 CareSync Healthcare Appointment Manager. Phase 9 Patient Portal.
+    </footer>
+
+    <!-- Scripts -->
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const appId = urlParams.get('id');
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const user = await auth.requireAuth('PATIENT', '../');
+            if (!user) return;
+
+            if (!appId) {
+                alert('No appointment ID provided');
+                window.location.href = 'appointments.html';
+                return;
+            }
+
+            loadAppointmentDetails();
+        });
+
+        async function loadAppointmentDetails() {
+            const loader = document.getElementById('loader');
+            const card = document.getElementById('details-card');
+
+            const res = await api.get(`/api/appointments/${appId}`);
+            loader.classList.add('hidden');
+
+            if (res.success && res.data) {
+                const app = res.data;
+                card.classList.remove('hidden');
+
+                document.getElementById('app-ref-id').textContent = `#APT-${String(app.id).padStart(5, '0')}`;
+                document.getElementById('doctor-name').textContent = `Dr. ${app.doctor_name}`;
+                document.getElementById('doctor-spec').textContent = app.specialization;
+                document.getElementById('app-date').textContent = app.appointment_date;
+                document.getElementById('app-time').textContent = `${app.start_time.substring(0, 5)} – ${app.end_time.substring(0, 5)}`;
+                document.getElementById('patient-name').textContent = app.patient_name;
+                document.getElementById('patient-email').textContent = app.patient_email;
+                document.getElementById('patient-phone').textContent = app.patient_phone || 'None recorded';
+                document.getElementById('created-at').textContent = app.created_at ? new Date(app.created_at).toLocaleString() : 'N/A';
+                document.getElementById('updated-at').textContent = app.updated_at ? new Date(app.updated_at).toLocaleString() : 'N/A';
+
+                // Render Symptoms
+                const symptomsBox = document.getElementById('symptoms-container');
+                if (app.symptoms && app.symptoms.trim()) {
+                    symptomsBox.innerHTML = `<p class="font-medium text-slate-800">${app.symptoms}</p>`;
+                } else {
+                    symptomsBox.innerHTML = `<span class="text-slate-400 italic">No symptoms or clinical notes provided at booking.</span>`;
+                }
+
+                const badge = document.getElementById('app-status-badge');
+                if (app.status === 'CONFIRMED') {
+                    badge.innerHTML = '<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-emerald-500 text-white shadow-sm"><i class="fa-solid fa-circle-check mr-1.5"></i> Confirmed</span>';
+                } else if (app.status === 'COMPLETED') {
+                    badge.innerHTML = '<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-sky-500 text-white shadow-sm"><i class="fa-solid fa-check-double mr-1.5"></i> Completed</span>';
+                } else if (app.status === 'CANCELLED') {
+                    badge.innerHTML = '<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-rose-500 text-white shadow-sm"><i class="fa-solid fa-ban mr-1.5"></i> Cancelled</span>';
+                } else if (app.status === 'RESCHEDULED') {
+                    badge.innerHTML = '<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-indigo-500 text-white shadow-sm"><i class="fa-solid fa-calendar-days mr-1.5"></i> Rescheduled</span>';
+                } else {
+                    badge.innerHTML = `<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-slate-500 text-white">${app.status}</span>`;
+                }
+
+                // Check and load clinical prescription
+                loadPrescriptionForPatient();
+            } else {
+                loader.innerHTML = `
+                    <div class="text-rose-600 font-semibold mb-3">${res.error || 'Appointment record not found'}</div>
+                    <a href="appointments.html" class="px-4 py-2 bg-sky-600 text-white rounded-xl text-xs font-semibold">Return to Appointments</a>
+                `;
+                loader.classList.remove('hidden');
+            }
+        }
+
+        async function loadPrescriptionForPatient() {
+            const rxRes = await api.get(`/api/appointments/${appId}/prescription`);
+            if (rxRes.success && rxRes.data) {
+                const rx = rxRes.data;
+                const section = document.getElementById('prescription-section');
+                section.classList.remove('hidden');
+
+                document.getElementById('rx-patient-notes').textContent = rx.notes || 'Routine consultation completed.';
+
+                const tbody = document.getElementById('rx-patient-meds-tbody');
+                if (rx.medications && rx.medications.length > 0) {
+                    tbody.innerHTML = rx.medications.map(m => `
+                        <tr class="hover:bg-slate-50/50">
+                            <td class="px-4 py-2.5 font-bold text-slate-900 flex items-center">
+                                <i class="fa-solid fa-capsules text-teal-600 mr-2 text-xs"></i> ${m.medication_name}
+                            </td>
+                            <td class="px-4 py-2.5 font-semibold text-teal-700">${m.dosage}</td>
+                            <td class="px-4 py-2.5 text-slate-700">${m.frequency}</td>
+                            <td class="px-4 py-2.5 text-slate-700">${m.duration}</td>
+                            <td class="px-4 py-2.5 text-slate-600 italic">${m.instructions || 'Standard dosage'}</td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tbody.innerHTML = `<tr><td colspan="5" class="px-4 py-3 text-center text-slate-400 italic">No medicinal drugs prescribed.</td></tr>`;
+                }
+
+                const followupBox = document.getElementById('rx-patient-followup-box');
+                if (rx.follow_up_instructions && rx.follow_up_instructions.trim()) {
+                    document.getElementById('rx-patient-followup').textContent = rx.follow_up_instructions;
+                    followupBox.classList.remove('hidden');
+                } else {
+                    followupBox.classList.add('hidden');
+                }
+
+                // If prescription exists or visit completed, also load the AI Care Summary
+                loadAiPostvisitSummary();
+            }
+        }
+
+        async function loadAiPostvisitSummary() {
+            const res = await api.get(`/api/appointments/${appId}/postvisit-summary`);
+            if (res.success && res.data) {
+                renderAiPostvisitData(res.data);
+            }
+        }
+
+        async function refreshAiPostvisitSummary() {
+            const spinner = document.getElementById('ai-postvisit-spinner');
+            const refreshBtn = document.getElementById('ai-postvisit-refresh-btn');
+            if (spinner) spinner.classList.add('fa-spin');
+            if (refreshBtn) refreshBtn.disabled = true;
+
+            const res = await api.post(`/api/appointments/${appId}/postvisit-summary`, {});
+            if (spinner) spinner.classList.remove('fa-spin');
+            if (refreshBtn) refreshBtn.disabled = false;
+
+            if (res.success && res.data) {
+                renderAiPostvisitData(res.data);
+            } else {
+                alert(`AI Care Summary Notice: ${res.error || 'Failed to synthesize summary'}`);
+            }
+        }
+
+        function renderAiPostvisitData(data) {
+            const section = document.getElementById('ai-postvisit-section');
+            if (!section) return;
+            section.classList.remove('hidden');
+
+            document.getElementById('ai-care-summary-text').textContent = data.summary || 'Your visit summary is ready.';
+
+            // Render Medication Schedule Cards
+            const schedList = document.getElementById('ai-medication-schedule-list');
+            const schedContainer = document.getElementById('ai-medication-schedule-container');
+            const schedule = data.medication_schedule || [];
+
+            if (schedule.length > 0) {
+                schedList.innerHTML = schedule.map(item => `
+                    <div class="p-3.5 bg-white/5 hover:bg-white/10 rounded-2xl border border-white/10 space-y-1.5 transition-all">
+                        <div class="flex items-center justify-between">
+                            <h4 class="font-extrabold text-white text-xs flex items-center">
+                                <i class="fa-solid fa-capsules text-indigo-400 mr-2 text-2xs"></i> ${item.medicine}
+                            </h4>
+                            <span class="px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-200 text-3xs font-bold border border-indigo-500/30">${item.dosage}</span>
+                        </div>
+                        <p class="text-3xs text-slate-300"><strong class="text-indigo-300">Intake:</strong> ${item.frequency}</p>
+                        <p class="text-3xs text-slate-300"><strong class="text-indigo-300">Duration:</strong> ${item.duration}</p>
+                    </div>
+                `).join('');
+                schedContainer.classList.remove('hidden');
+            } else {
+                schedList.innerHTML = `<div class="p-3 text-3xs text-slate-400 italic">No specific medication intake required.</div>`;
+            }
+
+            // Render Follow-up Steps
+            const stepsList = document.getElementById('ai-followup-steps-list');
+            const stepsContainer = document.getElementById('ai-followup-steps-container');
+            const steps = data.follow_up_steps || [];
+
+            if (steps.length > 0) {
+                stepsList.innerHTML = steps.map((step, idx) => `
+                    <div class="p-3 bg-white/5 rounded-2xl border border-white/10 text-xs text-slate-200 flex items-start space-x-2.5">
+                        <span class="w-5 h-5 rounded-full bg-indigo-500/30 text-indigo-300 font-bold text-3xs flex items-center justify-center flex-shrink-0 mt-0.5">
+                            ${idx + 1}
+                        </span>
+                        <span class="font-medium leading-relaxed">${step}</span>
+                    </div>
+                `).join('');
+                stepsContainer.classList.remove('hidden');
+            } else {
+                stepsList.innerHTML = `<div class="p-3 text-3xs text-slate-400 italic">No specific follow-up required. Maintain normal health routines.</div>`;
+            }
+
+            const modelTag = document.getElementById('ai-postvisit-model-tag');
+            if (modelTag) {
+                modelTag.textContent = `Model: ${data.model_name} [${data.status}]`;
+            }
+        }
+
+        async function downloadCalendarInvite() {
+            const token = localStorage.getItem('access_token');
+            if (!token || !appId) return;
+            try {
+                const response = await fetch(`${api.baseUrl}/api/appointments/${appId}/calendar-invite`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!response.ok) {
+                    alert('Could not download calendar invite.');
+                    return;
+                }
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `caresync-appointment-${appId}.ics`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                a.remove();
+            } catch (err) {
+                console.error('Error downloading iCal:', err);
+                alert('Failed to download calendar invite.');
+            }
+        }
+    </script>
+</body>
+</html>
+
+
+

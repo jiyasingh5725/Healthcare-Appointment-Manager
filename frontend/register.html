@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration & Portal Access - CareSync</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+
+    <div class="sm:mx-auto sm:w-full sm:max-w-md text-center">
+        <a href="index.html" class="inline-flex items-center space-x-2 text-sky-600 font-extrabold text-2xl">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-sky-600 to-teal-500 flex items-center justify-center text-white text-lg shadow-sm">
+                <i class="fa-solid fa-heart-pulse"></i>
+            </div>
+            <span>CareSync</span>
+        </a>
+        <h2 id="register-title" class="mt-4 text-3xl font-extrabold text-slate-900 tracking-tight">Create Patient Account</h2>
+        <p id="register-subtitle" class="mt-2 text-sm text-slate-600">
+            Already have an account? <a href="login.html" class="font-semibold text-sky-600 hover:text-sky-500 transition-colors">Sign in here</a>
+        </p>
+    </div>
+
+    <div class="mt-6 sm:mx-auto sm:w-full sm:max-w-lg">
+        <!-- Role Tabs -->
+        <div class="bg-slate-200/80 p-1.5 rounded-2xl grid grid-cols-3 gap-1 mb-4 shadow-inner">
+            <button type="button" onclick="switchRegisterTab('PATIENT')" id="reg-tab-patient" class="flex items-center justify-center py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all bg-white text-sky-700 shadow-sm">
+                <i class="fa-solid fa-hospital-user mr-1.5 sm:mr-2"></i> Patient
+            </button>
+            <button type="button" onclick="switchRegisterTab('DOCTOR')" id="reg-tab-doctor" class="flex items-center justify-center py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold transition-all text-slate-600 hover:text-teal-700">
+                <i class="fa-solid fa-user-doctor mr-1.5 sm:mr-2"></i> Doctor
+            </button>
+            <button type="button" onclick="switchRegisterTab('ADMIN')" id="reg-tab-admin" class="flex items-center justify-center py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold transition-all text-slate-600 hover:text-indigo-700">
+                <i class="fa-solid fa-shield-halved mr-1.5 sm:mr-2"></i> Admin
+            </button>
+        </div>
+
+        <!-- Card Container -->
+        <div class="bg-white py-8 px-6 shadow-sm border border-slate-200/80 rounded-2xl sm:px-10">
+            
+            <!-- Alert Messages -->
+            <div id="alert-box" class="hidden mb-6 p-4 rounded-xl text-sm"></div>
+
+            <!-- Doctor Notice Panel (Shown when Doctor tab is selected) -->
+            <div id="doctor-panel" class="hidden space-y-5">
+                <div class="p-4 rounded-xl bg-teal-50 border border-teal-200 text-teal-900">
+                    <div class="flex items-start space-x-3">
+                        <div class="w-9 h-9 rounded-xl bg-teal-600 text-white flex items-center justify-center shrink-0 mt-0.5">
+                            <i class="fa-solid fa-user-doctor text-base"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-teal-950">Clinical Staff Registration Policy</h3>
+                            <p class="text-xs text-teal-800 mt-1 leading-relaxed">
+                                To ensure medical verification and patient safety, physician and specialist accounts are created by Hospital Administrators through the Admin Operations Control Panel.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
+                    <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider mb-2">Instant Demo Access</h4>
+                    <p class="text-xs text-slate-600 mb-4">
+                        You can sign in directly with the pre-provisioned demo physician account to explore the Doctor Clinical Workspace:
+                    </p>
+                    <div class="bg-white p-3 rounded-lg border border-slate-200 text-xs font-mono text-slate-700 mb-4 flex justify-between items-center">
+                        <span>doctor@hospital.org / DoctorPass123!</span>
+                        <span class="text-3xs font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded">Dr. Gregory House</span>
+                    </div>
+                    <a href="login.html?role=doctor" class="w-full flex justify-center items-center py-2.5 px-4 rounded-xl text-sm font-bold text-white bg-teal-600 hover:bg-teal-700 shadow-md hover:shadow-teal-500/20 transition-all">
+                        <i class="fa-solid fa-right-to-bracket mr-2"></i> Sign In to Doctor Portal
+                    </a>
+                </div>
+            </div>
+
+            <!-- Admin Notice Panel (Shown when Admin tab is selected) -->
+            <div id="admin-panel" class="hidden space-y-5">
+                <div class="p-4 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-900">
+                    <div class="flex items-start space-x-3">
+                        <div class="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center shrink-0 mt-0.5">
+                            <i class="fa-solid fa-shield-halved text-base"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-indigo-950">Administrative Access Policy</h3>
+                            <p class="text-xs text-indigo-800 mt-1 leading-relaxed">
+                                Administrator privileges are restricted to authorized health system supervisors and IT operations staff.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
+                    <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider mb-2">Instant Demo Access</h4>
+                    <p class="text-xs text-slate-600 mb-4">
+                        You can sign in directly with the system administrator account to manage staff, shifts, and system health:
+                    </p>
+                    <div class="bg-white p-3 rounded-lg border border-slate-200 text-xs font-mono text-slate-700 mb-4 flex justify-between items-center">
+                        <span>admin@hospital.org / AdminPass123!</span>
+                        <span class="text-3xs font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded">Administrator</span>
+                    </div>
+                    <a href="login.html?role=admin" class="w-full flex justify-center items-center py-2.5 px-4 rounded-xl text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 shadow-md hover:shadow-indigo-500/20 transition-all">
+                        <i class="fa-solid fa-right-to-bracket mr-2"></i> Sign In to Admin Portal
+                    </a>
+                </div>
+            </div>
+
+            <!-- Patient Registration Form -->
+            <form id="register-form" class="space-y-4">
+                <div>
+                    <label for="name" class="block text-sm font-medium text-slate-700">Full Name</label>
+                    <div class="mt-1 relative rounded-lg shadow-sm">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                            <i class="fa-solid fa-user text-sm"></i>
+                        </div>
+                        <input id="name" name="name" type="text" required placeholder="Dr. / Mr. / Ms. Full Name"
+                            class="block w-full pl-10 pr-3 py-2.5 border border-slate-300 rounded-lg text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="email" class="block text-sm font-medium text-slate-700">Email Address</label>
+                    <div class="mt-1 relative rounded-lg shadow-sm">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                            <i class="fa-solid fa-envelope text-sm"></i>
+                        </div>
+                        <input id="email" name="email" type="email" required placeholder="patient@example.com"
+                            class="block w-full pl-10 pr-3 py-2.5 border border-slate-300 rounded-lg text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="phone" class="block text-sm font-medium text-slate-700">Phone Number (Optional)</label>
+                    <div class="mt-1 relative rounded-lg shadow-sm">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                            <i class="fa-solid fa-phone text-sm"></i>
+                        </div>
+                        <input id="phone" name="phone" type="tel" placeholder="+1 (555) 000-0000"
+                            class="block w-full pl-10 pr-3 py-2.5 border border-slate-300 rounded-lg text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="password" class="block text-sm font-medium text-slate-700">Password</label>
+                    <div class="mt-1 relative rounded-lg shadow-sm">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                            <i class="fa-solid fa-lock text-sm"></i>
+                        </div>
+                        <input id="password" name="password" type="password" required minlength="6" placeholder="At least 6 characters"
+                            class="block w-full pl-10 pr-3 py-2.5 border border-slate-300 rounded-lg text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="confirm-password" class="block text-sm font-medium text-slate-700">Confirm Password</label>
+                    <div class="mt-1 relative rounded-lg shadow-sm">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                            <i class="fa-solid fa-shield-check text-sm"></i>
+                        </div>
+                        <input id="confirm-password" name="confirm-password" type="password" required minlength="6" placeholder="Confirm your password"
+                            class="block w-full pl-10 pr-3 py-2.5 border border-slate-300 rounded-lg text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all">
+                    </div>
+                </div>
+
+                <div class="pt-2">
+                    <button type="submit" id="submit-btn" class="w-full flex justify-center items-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-sky-600 hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 transition-all">
+                        <span id="btn-text">Create Patient Account</span>
+                        <i id="btn-spinner" class="hidden fa-solid fa-circle-notch fa-spin ml-2"></i>
+                    </button>
+                </div>
+            </form>
+
+            <div class="mt-6 text-center text-xs text-slate-500 border-t border-slate-100 pt-4">
+                <span>By registering, you agree to our Healthcare Service Terms</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        function switchRegisterTab(role) {
+            const form = document.getElementById('register-form');
+            const docPanel = document.getElementById('doctor-panel');
+            const adminPanel = document.getElementById('admin-panel');
+            const title = document.getElementById('register-title');
+            const subtitle = document.getElementById('register-subtitle');
+
+            const tabPat = document.getElementById('reg-tab-patient');
+            const tabDoc = document.getElementById('reg-tab-doctor');
+            const tabAdm = document.getElementById('reg-tab-admin');
+
+            // Reset styles
+            tabPat.className = "flex items-center justify-center py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold transition-all text-slate-600 hover:text-sky-700";
+            tabDoc.className = "flex items-center justify-center py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold transition-all text-slate-600 hover:text-teal-700";
+            tabAdm.className = "flex items-center justify-center py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold transition-all text-slate-600 hover:text-indigo-700";
+
+            if (role === 'PATIENT') {
+                tabPat.className = "flex items-center justify-center py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all bg-white text-sky-700 shadow-sm";
+                form.classList.remove('hidden');
+                docPanel.classList.add('hidden');
+                adminPanel.classList.add('hidden');
+                title.textContent = 'Create Patient Account';
+                subtitle.innerHTML = 'Already have an account? <a href="login.html?role=patient" class="font-semibold text-sky-600 hover:text-sky-500">Sign in here</a>';
+            } else if (role === 'DOCTOR') {
+                tabDoc.className = "flex items-center justify-center py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all bg-white text-teal-700 shadow-sm";
+                form.classList.add('hidden');
+                docPanel.classList.remove('hidden');
+                adminPanel.classList.add('hidden');
+                title.textContent = 'Doctor Portal Registration';
+                subtitle.innerHTML = 'Looking for doctor access? <a href="login.html?role=doctor" class="font-semibold text-teal-600 hover:text-teal-500">Sign in with demo account</a>';
+            } else if (role === 'ADMIN') {
+                tabAdm.className = "flex items-center justify-center py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all bg-white text-indigo-700 shadow-sm";
+                form.classList.add('hidden');
+                docPanel.classList.add('hidden');
+                adminPanel.classList.remove('hidden');
+                title.textContent = 'Administrator Operations';
+                subtitle.innerHTML = 'Looking for admin access? <a href="login.html?role=admin" class="font-semibold text-indigo-600 hover:text-indigo-500">Sign in with demo account</a>';
+            }
+        }
+
+        // Initialize based on URL
+        document.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            const role = (params.get('role') || '').toUpperCase();
+            if (role === 'DOCTOR' || role === 'ADMIN') {
+                switchRegisterTab(role);
+            } else {
+                switchRegisterTab('PATIENT');
+            }
+        });
+
+        const registerForm = document.getElementById('register-form');
+        const submitBtn = document.getElementById('submit-btn');
+        const btnText = document.getElementById('btn-text');
+        const btnSpinner = document.getElementById('btn-spinner');
+        const alertBox = document.getElementById('alert-box');
+
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+
+            if (password !== confirmPassword) {
+                alertBox.className = 'mb-6 p-4 rounded-xl text-sm bg-rose-50 text-rose-800 border border-rose-200 flex items-center';
+                alertBox.innerHTML = '<i class="fa-solid fa-triangle-exclamation mr-2 text-rose-600"></i> Passwords do not match.';
+                alertBox.classList.remove('hidden');
+                return;
+            }
+
+            // Loading state
+            btnText.textContent = 'Creating Account...';
+            btnSpinner.classList.remove('hidden');
+            submitBtn.disabled = true;
+            alertBox.classList.add('hidden');
+
+            const result = await auth.register({
+                name,
+                email,
+                password,
+                phone: phone || null,
+            });
+
+            if (result.success) {
+                alertBox.className = 'mb-6 p-4 rounded-xl text-sm bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center';
+                alertBox.innerHTML = '<i class="fa-solid fa-circle-check mr-2 text-emerald-600"></i> Account created successfully! Redirecting to sign in...';
+                alertBox.classList.remove('hidden');
+
+                setTimeout(() => {
+                    window.location.href = 'login.html?role=patient&registered=true';
+                }, 1000);
+            } else {
+                alertBox.className = 'mb-6 p-4 rounded-xl text-sm bg-rose-50 text-rose-800 border border-rose-200 flex items-center';
+                alertBox.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-2 text-rose-600"></i> ${result.error}`;
+                alertBox.classList.remove('hidden');
+
+                btnText.textContent = 'Create Patient Account';
+                btnSpinner.classList.add('hidden');
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

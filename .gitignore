@@ -1,0 +1,47 @@
+# Environment configuration
+.env
+.env.local
+.env.*.local
+*.env
+
+# SQLite & Database dumps
+*.db
+*.sqlite
+*.sqlite3
+database/dumps/
+
+# Python bytecode & cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+.pytest_cache/
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# IDE & Editor settings
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Node & Frontend dependencies
+node_modules/
+
+# Logs & Celery state
+*.log
+celerybeat-schedule
+celerybeat.pid
+
+# OS generated files
+.DS_Store
+Thumbs.db

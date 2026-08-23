@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Consultations & Appointments - CareSync</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col font-sans">
+
+    <!-- Top Navigation -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-6">
+                <a href="dashboard.html" class="flex items-center space-x-2.5 text-sky-600 font-extrabold text-xl">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-sky-600 to-teal-500 flex items-center justify-center text-white text-base shadow-sm">
+                        <i class="fa-solid fa-heart-pulse"></i>
+                    </div>
+                    <span>CareSync</span>
+                </a>
+                <nav class="hidden md:flex items-center space-x-1 text-sm font-medium">
+                    <a href="dashboard.html" class="px-3.5 py-2 text-slate-600 hover:text-sky-600 hover:bg-slate-50 rounded-xl transition-colors flex items-center">
+                        <i class="fa-solid fa-gauge mr-2"></i> Dashboard
+                    </a>
+                    <a href="doctors.html" class="px-3.5 py-2 text-slate-600 hover:text-sky-600 hover:bg-slate-50 rounded-xl transition-colors flex items-center">
+                        <i class="fa-solid fa-user-doctor mr-2"></i> Find Doctors
+                    </a>
+                    <a href="book-appointment.html" class="px-3.5 py-2 text-slate-600 hover:text-sky-600 hover:bg-slate-50 rounded-xl transition-colors flex items-center">
+                        <i class="fa-solid fa-calendar-plus mr-2"></i> Book Appointment
+                    </a>
+                    <a href="appointments.html" class="px-3.5 py-2 text-sky-600 bg-sky-50 rounded-xl font-semibold flex items-center">
+                        <i class="fa-solid fa-calendar-check mr-2"></i> My Appointments
+                    </a>
+                </nav>
+            </div>
+
+            <div class="flex items-center space-x-4">
+                <a href="book-appointment.html" class="px-3.5 py-2 text-xs font-bold text-white bg-sky-600 hover:bg-sky-700 rounded-xl transition-all shadow-md flex items-center">
+                    <i class="fa-solid fa-plus mr-1.5"></i> Book Appointment
+                </a>
+                <button onclick="auth.logout('../login.html')" class="px-3 py-1.5 text-xs font-semibold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-xl border border-rose-200 transition-colors">
+                    Logout
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow space-y-6">
+        
+        <!-- Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">My Medical Appointments</h1>
+                <p class="text-xs sm:text-sm text-slate-500 mt-1">Review scheduled visits, past consultation history, and detailed clinic notes.</p>
+            </div>
+            <div class="flex items-center space-x-3">
+                <button onclick="fetchAppointments()" class="px-4 py-2.5 text-xs font-bold text-slate-700 hover:text-sky-600 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all shadow-sm flex items-center">
+                    <i class="fa-solid fa-rotate-right mr-2" id="refresh-icon"></i> Refresh
+                </button>
+            </div>
+        </div>
+
+        <!-- Filter Tabs -->
+        <div class="flex items-center space-x-2 border-b border-slate-200 overflow-x-auto pb-2">
+            <button onclick="setFilter('ALL')" id="tab-ALL" class="px-4 py-2 text-xs font-bold border-b-2 border-sky-600 text-sky-600 transition-all whitespace-nowrap">
+                All Appointments (<span id="count-all">0</span>)
+            </button>
+            <button onclick="setFilter('UPCOMING')" id="tab-UPCOMING" class="px-4 py-2 text-xs font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-700 transition-all whitespace-nowrap">
+                Upcoming (<span id="count-upcoming">0</span>)
+            </button>
+            <button onclick="setFilter('COMPLETED')" id="tab-COMPLETED" class="px-4 py-2 text-xs font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-700 transition-all whitespace-nowrap">
+                Completed (<span id="count-completed">0</span>)
+            </button>
+            <button onclick="setFilter('CANCELLED')" id="tab-CANCELLED" class="px-4 py-2 text-xs font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-700 transition-all whitespace-nowrap">
+                Cancelled (<span id="count-cancelled">0</span>)
+            </button>
+            <button onclick="setFilter('RESCHEDULED')" id="tab-RESCHEDULED" class="px-4 py-2 text-xs font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-700 transition-all whitespace-nowrap">
+                Rescheduled (<span id="count-rescheduled">0</span>)
+            </button>
+        </div>
+
+        <!-- Appointments Table Card -->
+        <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-slate-100 text-left text-sm">
+                    <thead class="bg-slate-50 text-slate-500 text-2xs uppercase tracking-wider font-bold">
+                        <tr>
+                            <th class="px-6 py-4">Reference</th>
+                            <th class="px-6 py-4">Physician & Specialty</th>
+                            <th class="px-6 py-4">Consultation Date</th>
+                            <th class="px-6 py-4">Time Interval</th>
+                            <th class="px-6 py-4">Status</th>
+                            <th class="px-6 py-4 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="appointments-tbody" class="divide-y divide-slate-100">
+                        <tr>
+                            <td colspan="6" class="px-6 py-16 text-center text-slate-400">
+                                <i class="fa-solid fa-circle-notch fa-spin text-2xl text-sky-500 mb-2"></i>
+                                <p class="text-xs">Loading appointments schedule...</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500 mt-auto">
+        © 2026 CareSync Healthcare Appointment Manager. Phase 9 Patient Portal.
+    </footer>
+
+    <!-- Scripts -->
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+    <script>
+        let allAppointments = [];
+        let currentFilter = 'ALL';
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const user = await auth.requireAuth('PATIENT', '../');
+            if (!user) return;
+
+            await fetchAppointments();
+        });
+
+        async function fetchAppointments() {
+            const refreshIcon = document.getElementById('refresh-icon');
+            if (refreshIcon) refreshIcon.classList.add('fa-spin');
+
+            const res = await api.get('/api/appointments');
+            if (refreshIcon) refreshIcon.classList.remove('fa-spin');
+
+            if (res.success && Array.isArray(res.data)) {
+                allAppointments = res.data;
+                updateCounts();
+                renderAppointments();
+            } else {
+                document.getElementById('appointments-tbody').innerHTML = `
+                    <tr>
+                        <td colspan="6" class="px-6 py-10 text-center text-rose-600 font-medium">
+                            Failed to load appointments: ${res.error || 'Server error'}
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        function updateCounts() {
+            document.getElementById('count-all').textContent = allAppointments.length;
+            document.getElementById('count-upcoming').textContent = allAppointments.filter(a => ['CONFIRMED', 'HOLD', 'RESCHEDULED'].includes(a.status)).length;
+            document.getElementById('count-completed').textContent = allAppointments.filter(a => a.status === 'COMPLETED').length;
+            document.getElementById('count-cancelled').textContent = allAppointments.filter(a => a.status === 'CANCELLED').length;
+            document.getElementById('count-rescheduled').textContent = allAppointments.filter(a => a.status === 'RESCHEDULED').length;
+        }
+
+        function setFilter(filterKey) {
+            currentFilter = filterKey;
+            ['ALL', 'UPCOMING', 'COMPLETED', 'CANCELLED', 'RESCHEDULED'].forEach(tab => {
+                const el = document.getElementById(`tab-${tab}`);
+                if (tab === filterKey) {
+                    el.className = 'px-4 py-2 text-xs font-bold border-b-2 border-sky-600 text-sky-600 transition-all whitespace-nowrap';
+                } else {
+                    el.className = 'px-4 py-2 text-xs font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-700 transition-all whitespace-nowrap';
+                }
+            });
+            renderAppointments();
+        }
+
+        function renderAppointments() {
+            const tbody = document.getElementById('appointments-tbody');
+            const filtered = allAppointments.filter(a => {
+                if (currentFilter === 'ALL') return true;
+                if (currentFilter === 'UPCOMING') return ['CONFIRMED', 'HOLD', 'RESCHEDULED'].includes(a.status);
+                return a.status === currentFilter;
+            });
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="px-6 py-16 text-center text-slate-400">
+                            <i class="fa-solid fa-calendar-xmark text-4xl text-slate-300 mb-3"></i>
+                            <p class="font-bold text-slate-700 text-base">No appointments in this view</p>
+                            <p class="text-xs text-slate-500 mt-1 mb-4">No matching consultation records found.</p>
+                            <a href="book-appointment.html" class="px-5 py-2.5 bg-sky-600 hover:bg-sky-700 text-white rounded-xl font-bold text-xs shadow-md transition-all inline-flex items-center">
+                                <i class="fa-solid fa-plus mr-1.5"></i> Book Appointment Now
+                            </a>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(app => {
+                const startTime = app.start_time.substring(0, 5);
+                const endTime = app.end_time.substring(0, 5);
+
+                let statusBadge = '';
+                if (app.status === 'CONFIRMED') {
+                    statusBadge = '<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200"><span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-emerald-500"></span>Confirmed</span>';
+                } else if (app.status === 'COMPLETED') {
+                    statusBadge = '<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-sky-50 text-sky-700 border border-sky-200"><span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-sky-500"></span>Completed</span>';
+                } else if (app.status === 'CANCELLED') {
+                    statusBadge = '<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200"><span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-rose-500"></span>Cancelled</span>';
+                } else if (app.status === 'HOLD') {
+                    statusBadge = '<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200"><span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-amber-500"></span>On Hold</span>';
+                } else if (app.status === 'RESCHEDULED') {
+                    statusBadge = '<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200"><span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-indigo-500"></span>Rescheduled</span>';
+                } else {
+                    statusBadge = `<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-800">${app.status}</span>`;
+                }
+
+                return `
+                    <tr class="hover:bg-slate-50/80 transition-colors">
+                        <td class="px-6 py-4 font-mono font-bold text-slate-800 text-xs">
+                            #APT-${String(app.id).padStart(5, '0')}
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="font-bold text-slate-900">Dr. ${app.doctor_name}</div>
+                            <div class="text-xs text-sky-600 font-semibold">${app.specialization}</div>
+                            ${app.symptoms ? `<div class="text-2xs text-slate-400 truncate max-w-xs mt-0.5"><i class="fa-solid fa-notes-medical mr-1 text-slate-400"></i> ${app.symptoms}</div>` : ''}
+                        </td>
+                        <td class="px-6 py-4 font-medium text-slate-800 text-xs">
+                            <i class="fa-regular fa-calendar text-sky-500 mr-1.5"></i> ${app.appointment_date}
+                        </td>
+                        <td class="px-6 py-4 font-medium text-slate-800 text-xs">
+                            <i class="fa-regular fa-clock text-slate-400 mr-1.5"></i> ${startTime} – ${endTime}
+                        </td>
+                        <td class="px-6 py-4">
+                            ${statusBadge}
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <a href="appointment-details.html?id=${app.id}" class="px-3.5 py-2 text-xs font-bold text-sky-700 hover:text-sky-800 bg-sky-50 hover:bg-sky-100 rounded-xl border border-sky-200 transition-all inline-flex items-center">
+                                View Details <i class="fa-solid fa-chevron-right ml-1.5 text-2xs"></i>
+                            </a>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+    </script>
+</body>
+</html>

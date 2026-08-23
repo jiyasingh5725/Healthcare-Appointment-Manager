@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Management - Admin Portal</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col font-sans">
+
+    <!-- Top Navigation -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-6">
+                <a href="../index.html" class="flex items-center space-x-2 text-indigo-600 font-extrabold text-xl">
+                    <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center text-white text-sm shadow-sm">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <span>CareSync</span>
+                </a>
+                <nav class="hidden md:flex items-center space-x-1 text-sm font-medium">
+                    <a href="dashboard.html" class="px-3 py-2 text-slate-600 hover:text-indigo-600 hover:bg-slate-50 rounded-lg transition-colors">Dashboard</a>
+                    <a href="doctors.html" class="px-3 py-2 text-indigo-600 bg-indigo-50 rounded-lg font-semibold">Doctors</a>
+                    <a href="create-doctor.html" class="px-3 py-2 text-slate-600 hover:text-indigo-600 hover:bg-slate-50 rounded-lg transition-colors">Add Doctor</a>
+                </nav>
+            </div>
+
+            <div class="flex items-center space-x-4">
+                <a href="create-doctor.html" class="px-4 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-sm transition-all flex items-center">
+                    <i class="fa-solid fa-plus mr-1.5"></i> Add Doctor
+                </a>
+                <button onclick="auth.logout('../login.html')" class="px-3 py-2 text-xs font-semibold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-lg border border-rose-200 transition-colors">
+                    Logout
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 hidden max-w-sm p-4 rounded-xl shadow-lg border text-sm transition-all transform ease-out duration-300"></div>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow">
+        
+        <!-- Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900">Doctor Directory & Staff Oversight</h1>
+                <p class="text-sm text-slate-500 mt-1">Manage doctor credentials, consulting slot durations, and activation status.</p>
+            </div>
+            <a href="create-doctor.html" class="inline-flex items-center px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl shadow-sm hover:shadow transition-all">
+                <i class="fa-solid fa-user-plus mr-2"></i> Onboard New Doctor
+            </a>
+        </div>
+
+        <!-- Filter & Search Bar -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm mb-6 flex flex-col md:flex-row gap-4 justify-between items-center">
+            <!-- Search -->
+            <div class="w-full md:w-80 relative">
+                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                    <i class="fa-solid fa-magnifying-glass text-sm"></i>
+                </div>
+                <input id="search-input" type="text" placeholder="Search doctor name or credentials..."
+                    class="w-full pl-10 pr-4 py-2 text-sm border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
+            </div>
+
+            <!-- Filters -->
+            <div class="flex flex-wrap sm:flex-nowrap items-center gap-3 w-full md:w-auto">
+                <select id="specialization-filter" class="w-full sm:w-auto px-3 py-2 text-sm border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+                    <option value="">All Specializations</option>
+                </select>
+
+                <select id="status-filter" class="w-full sm:w-auto px-3 py-2 text-sm border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+                    <option value="all">All Statuses</option>
+                    <option value="active">Active Only</option>
+                    <option value="inactive">Inactive Only</option>
+                </select>
+
+                <button id="refresh-btn" onclick="fetchDoctors()" class="px-3 py-2 text-sm text-slate-600 hover:text-indigo-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors" title="Refresh list">
+                    <i class="fa-solid fa-rotate-right" id="refresh-icon"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Doctors Table Container -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-slate-200 text-left text-sm">
+                    <thead class="bg-slate-50 text-slate-500 text-xs uppercase font-semibold">
+                        <tr>
+                            <th class="px-6 py-4">Physician</th>
+                            <th class="px-6 py-4">Specialization & Credentials</th>
+                            <th class="px-6 py-4">Experience</th>
+                            <th class="px-6 py-4">Slot Duration</th>
+                            <th class="px-6 py-4">Status</th>
+                            <th class="px-6 py-4 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="doctors-tbody" class="divide-y divide-slate-100">
+                        <tr>
+                            <td colspan="6" class="px-6 py-12 text-center text-slate-400">
+                                <i class="fa-solid fa-circle-notch fa-spin text-2xl text-indigo-500 mb-2"></i>
+                                <p>Loading doctor directory...</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500">
+        © 2026 CareSync Healthcare Appointment Manager. Phase 4 Admin Management.
+    </footer>
+
+    <!-- Scripts -->
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+    <script>
+        let allDoctors = [];
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const user = await auth.requireAuth('ADMIN', '../');
+            if (!user) return;
+
+            await fetchDoctors();
+
+            // Search and filter listeners
+            document.getElementById('search-input').addEventListener('input', applyFilters);
+            document.getElementById('specialization-filter').addEventListener('change', applyFilters);
+            document.getElementById('status-filter').addEventListener('change', applyFilters);
+        });
+
+        async function fetchDoctors() {
+            const refreshIcon = document.getElementById('refresh-icon');
+            if (refreshIcon) refreshIcon.classList.add('fa-spin');
+
+            const res = await api.get('/api/doctors?active_only=false');
+            if (refreshIcon) refreshIcon.classList.remove('fa-spin');
+
+            if (res.success && Array.isArray(res.data)) {
+                allDoctors = res.data;
+                populateSpecializationOptions();
+                applyFilters();
+            } else {
+                showToast(res.error || 'Failed to fetch doctor directory', 'error');
+                document.getElementById('doctors-tbody').innerHTML = `
+                    <tr>
+                        <td colspan="6" class="px-6 py-8 text-center text-rose-600 font-medium">
+                            <i class="fa-solid fa-triangle-exclamation mr-1.5"></i> ${res.error || 'Error loading records'}
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        function populateSpecializationOptions() {
+            const specSelect = document.getElementById('specialization-filter');
+            const currentVal = specSelect.value;
+            const specs = Array.from(new Set(allDoctors.map(d => d.specialization))).sort();
+
+            specSelect.innerHTML = '<option value="">All Specializations</option>';
+            specs.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s;
+                opt.textContent = s;
+                if (s === currentVal) opt.selected = true;
+                specSelect.appendChild(opt);
+            });
+        }
+
+        function applyFilters() {
+            const search = document.getElementById('search-input').value.toLowerCase().trim();
+            const spec = document.getElementById('specialization-filter').value;
+            const status = document.getElementById('status-filter').value;
+
+            const filtered = allDoctors.filter(doc => {
+                // Search filter
+                const matchesSearch = !search || 
+                    doc.name.toLowerCase().includes(search) || 
+                    doc.email.toLowerCase().includes(search) || 
+                    (doc.qualification && doc.qualification.toLowerCase().includes(search)) ||
+                    doc.specialization.toLowerCase().includes(search);
+
+                // Specialization filter
+                const matchesSpec = !spec || doc.specialization === spec;
+
+                // Status filter
+                const matchesStatus = status === 'all' || 
+                    (status === 'active' && doc.is_active) || 
+                    (status === 'inactive' && !doc.is_active);
+
+                return matchesSearch && matchesSpec && matchesStatus;
+            });
+
+            renderTable(filtered);
+        }
+
+        function renderTable(doctors) {
+            const tbody = document.getElementById('doctors-tbody');
+
+            if (doctors.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="px-6 py-12 text-center text-slate-400">
+                            <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center text-xl mx-auto mb-3">
+                                <i class="fa-solid fa-user-slash"></i>
+                            </div>
+                            <p class="font-semibold text-slate-700">No doctors match your criteria</p>
+                            <p class="text-xs text-slate-500 mt-1">Try resetting the filters or add a new doctor.</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = doctors.map(doc => `
+                <tr class="hover:bg-slate-50/80 transition-colors">
+                    <td class="px-6 py-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-600 text-white font-bold text-xs flex items-center justify-center shadow-sm">
+                                ${doc.name.split(' ').map(n => n[0]).slice(0, 2).join('')}
+                            </div>
+                            <div>
+                                <div class="font-bold text-slate-900">Dr. ${doc.name}</div>
+                                <div class="text-xs text-slate-500">${doc.email}</div>
+                                ${doc.phone ? `<div class="text-xs text-slate-400 mt-0.5"><i class="fa-solid fa-phone mr-1 text-2xs"></i>${doc.phone}</div>` : ''}
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                            ${doc.specialization}
+                        </span>
+                        ${doc.qualification ? `<div class="text-xs text-slate-600 mt-1 font-medium">${doc.qualification}</div>` : ''}
+                    </td>
+                    <td class="px-6 py-4 text-slate-700 font-medium">
+                        ${doc.experience !== null && doc.experience !== undefined ? `${doc.experience} Years` : 'Not specified'}
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700">
+                            <i class="fa-regular fa-clock mr-1.5 text-slate-400"></i> ${doc.slot_duration} mins
+                        </span>
+                    </td>
+                    <td class="px-6 py-4">
+                        ${doc.is_active 
+                            ? `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                 <span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-emerald-500"></span> Active
+                               </span>`
+                            : `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200">
+                                 <span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-slate-400"></span> Inactive
+                               </span>`
+                        }
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                        <div class="flex items-center justify-end space-x-2">
+                            <a href="doctor-schedule.html?id=${doc.id}" class="px-2.5 py-1.5 text-xs font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-lg shadow-2xs transition-all inline-flex items-center" title="Manage Working Hours & Leaves">
+                                <i class="fa-solid fa-calendar-week mr-1"></i> Schedule
+                            </a>
+                            <a href="edit-doctor.html?id=${doc.id}" class="px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:text-indigo-600 bg-white hover:bg-slate-50 border border-slate-200 rounded-lg shadow-2xs transition-all inline-flex items-center">
+                                <i class="fa-solid fa-pen-to-square mr-1"></i> Edit
+                            </a>
+                            <button onclick="toggleDoctorStatus(${doc.id}, ${doc.is_active})" id="status-btn-${doc.id}" 
+                                class="px-2.5 py-1.5 text-xs font-semibold rounded-lg border transition-all inline-flex items-center ${
+                                    doc.is_active 
+                                        ? 'text-amber-700 bg-amber-50 hover:bg-amber-100 border-amber-200' 
+                                        : 'text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border-emerald-200'
+                                }">
+                                <i class="fa-solid ${doc.is_active ? 'fa-ban' : 'fa-check'} mr-1"></i>
+                                ${doc.is_active ? 'Deactivate' : 'Activate'}
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function toggleDoctorStatus(doctorId, currentStatus) {
+            const newStatus = !currentStatus;
+            const confirmMsg = currentStatus 
+                ? 'Are you sure you want to deactivate this doctor account?' 
+                : 'Activate this doctor account for scheduling?';
+
+            if (!confirm(confirmMsg)) return;
+
+            const btn = document.getElementById(`status-btn-${doctorId}`);
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-1"></i> Updating...';
+            }
+
+            const res = await api.request(`/api/admin/doctors/${doctorId}/status`, {
+                method: 'PATCH',
+                body: JSON.stringify({ is_active: newStatus })
+            });
+
+            if (res.success && res.data) {
+                showToast(`Dr. ${res.data.name} is now ${newStatus ? 'Active' : 'Inactive'}.`, 'success');
+                // Update local model
+                const index = allDoctors.findIndex(d => d.id === doctorId);
+                if (index !== -1) {
+                    allDoctors[index] = res.data;
+                }
+                applyFilters();
+            } else {
+                showToast(res.error || 'Failed to update doctor status', 'error');
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = `<i class="fa-solid ${currentStatus ? 'fa-ban' : 'fa-check'} mr-1"></i> ${currentStatus ? 'Deactivate' : 'Activate'}`;
+                }
+            }
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.className = `fixed bottom-5 right-5 z-50 max-w-sm p-4 rounded-xl shadow-lg border text-sm transition-all transform ease-out duration-300 flex items-center ${
+                type === 'success' 
+                    ? 'bg-emerald-900 text-white border-emerald-700' 
+                    : 'bg-rose-900 text-white border-rose-700'
+            }`;
+            toast.innerHTML = `
+                <i class="fa-solid ${type === 'success' ? 'fa-circle-check text-emerald-400' : 'fa-triangle-exclamation text-rose-400'} text-lg mr-3"></i>
+                <span>${message}</span>
+            `;
+            toast.classList.remove('hidden');
+
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3500);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Working Hours & Leaves - Admin Portal</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col font-sans">
+
+    <!-- Top Navigation -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-6">
+                <a href="../index.html" class="flex items-center space-x-2 text-indigo-600 font-extrabold text-xl">
+                    <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center text-white text-sm shadow-sm">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <span>CareSync</span>
+                </a>
+                <nav class="hidden md:flex items-center space-x-1 text-sm font-medium">
+                    <a href="dashboard.html" class="px-3 py-2 text-slate-600 hover:text-indigo-600 hover:bg-slate-50 rounded-lg transition-colors">Dashboard</a>
+                    <a href="doctors.html" class="px-3 py-2 text-indigo-600 bg-indigo-50 rounded-lg font-semibold">Doctors</a>
+                    <a href="create-doctor.html" class="px-3 py-2 text-slate-600 hover:text-indigo-600 hover:bg-slate-50 rounded-lg transition-colors">Add Doctor</a>
+                </nav>
+            </div>
+
+            <div class="flex items-center space-x-4">
+                <a href="doctors.html" class="px-3.5 py-2 text-xs font-semibold text-slate-700 hover:text-indigo-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors flex items-center">
+                    <i class="fa-solid fa-arrow-left mr-1.5"></i> Back to Doctors
+                </a>
+                <button onclick="auth.logout('../login.html')" class="px-3 py-2 text-xs font-semibold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-lg border border-rose-200 transition-colors">
+                    Logout
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 hidden max-w-md p-4 rounded-xl shadow-lg border text-sm transition-all transform ease-out duration-300"></div>
+
+    <!-- Main Content -->
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow">
+        
+        <!-- Breadcrumb -->
+        <nav class="flex items-center space-x-2 text-xs text-slate-500 mb-4">
+            <a href="dashboard.html" class="hover:text-indigo-600">Admin</a>
+            <i class="fa-solid fa-chevron-right text-2xs text-slate-400"></i>
+            <a href="doctors.html" class="hover:text-indigo-600">Doctors</a>
+            <i class="fa-solid fa-chevron-right text-2xs text-slate-400"></i>
+            <span class="text-slate-800 font-semibold">Working Hours & Leaves</span>
+        </nav>
+
+        <!-- Doctor Header Card -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 mb-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div class="flex items-center space-x-4">
+                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-600 text-white font-bold text-lg flex items-center justify-center shadow-md">
+                        <i class="fa-solid fa-user-doctor"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <h1 id="doc-header-name" class="text-xl sm:text-2xl font-extrabold text-slate-900">Dr. Loading...</h1>
+                            <span id="doc-header-status"></span>
+                        </div>
+                        <p id="doc-header-spec" class="text-xs sm:text-sm text-slate-500 mt-0.5">Specialization & Credentials</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3 text-xs">
+                    <div class="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 font-medium">
+                        Slot: <span id="doc-header-slot" class="font-bold text-indigo-600">-- mins</span>
+                    </div>
+                    <a id="edit-doc-link" href="#" class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 hover:text-indigo-600 font-medium transition-colors shadow-2xs">
+                        <i class="fa-solid fa-pen mr-1"></i> Edit Profile
+                    </a>
+                </div>
+            </div>
+
+            <!-- Tab Switcher -->
+            <div class="flex items-center space-x-2 mt-6 pt-5 border-t border-slate-100">
+                <button id="tab-btn-hours" onclick="switchTab('hours')" class="px-4 py-2 text-sm font-bold rounded-xl transition-all bg-indigo-600 text-white shadow-sm flex items-center">
+                    <i class="fa-solid fa-clock mr-2"></i> Weekly Working Hours
+                </button>
+                <button id="tab-btn-leaves" onclick="switchTab('leaves')" class="px-4 py-2 text-sm font-semibold rounded-xl text-slate-600 hover:text-indigo-600 hover:bg-slate-100 transition-all flex items-center">
+                    <i class="fa-solid fa-calendar-xmark mr-2"></i> Doctor Leaves & Days Off
+                </button>
+            </div>
+        </div>
+
+        <!-- ================= TAB 1: WORKING HOURS ================= -->
+        <div id="tab-content-hours" class="space-y-6">
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-100">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-900">Weekly Consultation Schedule</h2>
+                        <p class="text-xs text-slate-500 mt-0.5">Configure consultation start and end times for each day of the week (Monday through Sunday).</p>
+                    </div>
+                    <!-- Schedule Presets -->
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="text-xs text-slate-500 font-medium mr-1">Presets:</span>
+                        <button type="button" onclick="applyPreset('standard')" class="px-2.5 py-1 text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors">
+                            Mon–Fri (9 AM – 5 PM)
+                        </button>
+                        <button type="button" onclick="applyPreset('sixday')" class="px-2.5 py-1 text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors">
+                            Mon–Sat (10 AM – 6 PM)
+                        </button>
+                        <button type="button" onclick="applyPreset('clear')" class="px-2.5 py-1 text-xs font-semibold bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-lg transition-colors">
+                            Clear All
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Alert Box -->
+                <div id="hours-alert-box" class="hidden my-4 p-4 rounded-xl text-sm"></div>
+
+                <!-- 7 Days Form -->
+                <form id="working-hours-form" class="mt-6 space-y-4">
+                    <div id="days-container" class="divide-y divide-slate-100">
+                        <div class="py-8 text-center text-slate-400">
+                            <i class="fa-solid fa-circle-notch fa-spin text-xl text-indigo-500 mb-2"></i>
+                            <p>Loading schedule...</p>
+                        </div>
+                    </div>
+
+                    <div class="pt-6 border-t border-slate-100 flex items-center justify-end">
+                        <button type="submit" id="save-hours-btn" class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm rounded-xl shadow-md hover:shadow-indigo-500/25 transition-all flex items-center">
+                            <span id="save-hours-text">Save Weekly Schedule</span>
+                            <i id="save-hours-spinner" class="hidden fa-solid fa-circle-notch fa-spin ml-2"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- ================= TAB 2: LEAVE MANAGEMENT ================= -->
+        <div id="tab-content-leaves" class="hidden space-y-6">
+            
+            <!-- Schedule Leave Card -->
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8">
+                <div class="border-b border-slate-100 pb-4 mb-5">
+                    <h2 class="text-lg font-bold text-slate-900">Schedule Doctor Leave / Day Off</h2>
+                    <p class="text-xs text-slate-500 mt-0.5">
+                        Blocks appointments on the chosen date. If existing appointments are scheduled on that day, the system will detect and flag the conflicts without deleting patient records.
+                    </p>
+                </div>
+
+                <div id="leave-alert-box" class="hidden mb-6 p-4 rounded-xl text-sm"></div>
+
+                <form id="add-leave-form" class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+                    <div>
+                        <label for="leave_date" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">Leave Date *</label>
+                        <input id="leave_date" name="leave_date" type="date" required
+                            class="block w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white">
+                    </div>
+
+                    <div>
+                        <label for="leave_reason" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">Reason (Optional)</label>
+                        <input id="leave_reason" name="leave_reason" type="text" placeholder="e.g. Medical Conference, Annual Leave"
+                            class="block w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+
+                    <div>
+                        <button type="submit" id="add-leave-btn" class="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm rounded-xl shadow-md hover:shadow-indigo-500/25 transition-all flex items-center justify-center">
+                            <span id="add-leave-text"><i class="fa-solid fa-plus mr-1.5"></i> Schedule Leave</span>
+                            <i id="add-leave-spinner" class="hidden fa-solid fa-circle-notch fa-spin ml-2"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Leaves List Card -->
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="px-6 py-5 border-b border-slate-200 flex items-center justify-between">
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900">Scheduled Leaves & Time Off</h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Doctor is unavailable for appointments on these dates.</p>
+                    </div>
+                    <button onclick="fetchDoctorLeaves()" class="px-3 py-1.5 text-xs text-slate-600 hover:text-indigo-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors">
+                        <i class="fa-solid fa-rotate-right" id="refresh-leaves-icon"></i> Refresh
+                    </button>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-slate-200 text-left text-sm">
+                        <thead class="bg-slate-50 text-slate-500 text-xs uppercase font-semibold">
+                            <tr>
+                                <th class="px-6 py-3.5">Leave Date</th>
+                                <th class="px-6 py-3.5">Day of Week</th>
+                                <th class="px-6 py-3.5">Reason</th>
+                                <th class="px-6 py-3.5">Scheduled On</th>
+                                <th class="px-6 py-3.5 text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leaves-tbody" class="divide-y divide-slate-100">
+                            <tr>
+                                <td colspan="5" class="px-6 py-8 text-center text-slate-400">
+                                    <i class="fa-solid fa-circle-notch fa-spin text-lg text-indigo-500 mb-2"></i>
+                                    <p>Loading scheduled leaves...</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500">
+        © 2026 CareSync Healthcare Appointment Manager. Phase 5 Schedule & Leave Management.
+    </footer>
+
+    <!-- Scripts -->
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const doctorId = params.get('id');
+        const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const user = await auth.requireAuth('ADMIN', '../');
+            if (!user) return;
+
+            if (!doctorId) {
+                alert('No Doctor ID provided');
+                window.location.href = 'doctors.html';
+                return;
+            }
+
+            document.getElementById('edit-doc-link').href = `edit-doctor.html?id=${doctorId}`;
+            
+            // Set min date for leave picker to today
+            const todayStr = new Date().toISOString().split('T')[0];
+            document.getElementById('leave_date').min = todayStr;
+
+            await loadDoctorHeader();
+            await fetchWorkingHours();
+            await fetchDoctorLeaves();
+        });
+
+        function switchTab(tab) {
+            const btnHours = document.getElementById('tab-btn-hours');
+            const btnLeaves = document.getElementById('tab-btn-leaves');
+            const contentHours = document.getElementById('tab-content-hours');
+            const contentLeaves = document.getElementById('tab-content-leaves');
+
+            if (tab === 'hours') {
+                btnHours.className = 'px-4 py-2 text-sm font-bold rounded-xl transition-all bg-indigo-600 text-white shadow-sm flex items-center';
+                btnLeaves.className = 'px-4 py-2 text-sm font-semibold rounded-xl text-slate-600 hover:text-indigo-600 hover:bg-slate-100 transition-all flex items-center';
+                contentHours.classList.remove('hidden');
+                contentLeaves.classList.add('hidden');
+            } else {
+                btnLeaves.className = 'px-4 py-2 text-sm font-bold rounded-xl transition-all bg-indigo-600 text-white shadow-sm flex items-center';
+                btnHours.className = 'px-4 py-2 text-sm font-semibold rounded-xl text-slate-600 hover:text-indigo-600 hover:bg-slate-100 transition-all flex items-center';
+                contentLeaves.classList.remove('hidden');
+                contentHours.classList.add('hidden');
+            }
+        }
+
+        async function loadDoctorHeader() {
+            const res = await api.get(`/api/doctors/${doctorId}`);
+            if (res.success && res.data) {
+                const doc = res.data;
+                document.getElementById('doc-header-name').textContent = `Dr. ${doc.name}`;
+                document.getElementById('doc-header-spec').textContent = `${doc.specialization} ${doc.qualification ? '• ' + doc.qualification : ''}`;
+                document.getElementById('doc-header-slot').textContent = `${doc.slot_duration} mins`;
+                document.getElementById('doc-header-status').innerHTML = doc.is_active
+                    ? `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800"><span class="w-1.5 h-1.5 mr-1 rounded-full bg-emerald-500"></span>Active</span>`
+                    : `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600"><span class="w-1.5 h-1.5 mr-1 rounded-full bg-slate-400"></span>Inactive</span>`;
+            }
+        }
+
+        // ================= WORKING HOURS LOGIC =================
+
+        async function fetchWorkingHours() {
+            const res = await api.get(`/api/admin/doctors/${doctorId}/working-hours`);
+            const container = document.getElementById('days-container');
+
+            if (res.success && Array.isArray(res.data)) {
+                const hours = res.data;
+                container.innerHTML = hours.map((day, idx) => {
+                    const isWorking = day.is_working;
+                    const startTime = day.start_time ? day.start_time.substring(0, 5) : '09:00';
+                    const endTime = day.end_time ? day.end_time.substring(0, 5) : '17:00';
+
+                    return `
+                        <div class="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4" id="day-row-${idx}">
+                            <div class="w-48 flex items-center space-x-3">
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="working-toggle-${idx}" onchange="toggleDayActive(${idx})" ${isWorking ? 'checked' : ''} class="sr-only peer">
+                                    <div class="w-10 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
+                                </label>
+                                <span class="font-bold text-sm text-slate-800 select-none">${day.day_name}</span>
+                            </div>
+
+                            <div class="flex items-center space-x-3 flex-grow sm:justify-end ${isWorking ? '' : 'opacity-40 pointer-events-none'}" id="time-inputs-${idx}">
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-xs font-medium text-slate-500">From:</span>
+                                    <input type="time" id="start-time-${idx}" value="${startTime}"
+                                        class="px-2.5 py-1.5 border border-slate-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                                </div>
+                                <span class="text-slate-400 text-xs">to</span>
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-xs font-medium text-slate-500">To:</span>
+                                    <input type="time" id="end-time-${idx}" value="${endTime}"
+                                        class="px-2.5 py-1.5 border border-slate-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                container.innerHTML = `
+                    <div class="py-8 text-center text-rose-600 text-sm font-medium">
+                        Failed to load working hours: ${res.error || 'Server error'}
+                    </div>
+                `;
+            }
+        }
+
+        function toggleDayActive(dayIdx) {
+            const isChecked = document.getElementById(`working-toggle-${dayIdx}`).checked;
+            const timeGroup = document.getElementById(`time-inputs-${dayIdx}`);
+            if (isChecked) {
+                timeGroup.classList.remove('opacity-40', 'pointer-events-none');
+            } else {
+                timeGroup.classList.add('opacity-40', 'pointer-events-none');
+            }
+        }
+
+        function applyPreset(type) {
+            for (let i = 0; i < 7; i++) {
+                const toggle = document.getElementById(`working-toggle-${i}`);
+                const start = document.getElementById(`start-time-${i}`);
+                const end = document.getElementById(`end-time-${i}`);
+
+                if (type === 'standard') {
+                    // Mon-Fri 9-5
+                    toggle.checked = i < 5;
+                    start.value = '09:00';
+                    end.value = '17:00';
+                } else if (type === 'sixday') {
+                    // Mon-Sat 10-6
+                    toggle.checked = i < 6;
+                    start.value = '10:00';
+                    end.value = '18:00';
+                } else if (type === 'clear') {
+                    toggle.checked = false;
+                }
+                toggleDayActive(i);
+            }
+            showToast('Preset applied! Click Save to apply changes.', 'success');
+        }
+
+        document.getElementById('working-hours-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const alertBox = document.getElementById('hours-alert-box');
+            const saveBtn = document.getElementById('save-hours-btn');
+            const btnText = document.getElementById('save-hours-text');
+            const btnSpinner = document.getElementById('save-hours-spinner');
+
+            const payloadItems = [];
+            for (let i = 0; i < 7; i++) {
+                const isWorking = document.getElementById(`working-toggle-${i}`).checked;
+                const startTime = document.getElementById(`start-time-${i}`).value;
+                const endTime = document.getElementById(`end-time-${i}`).value;
+
+                if (isWorking) {
+                    if (startTime >= endTime) {
+                        alertBox.className = 'my-4 p-4 rounded-xl text-sm bg-rose-50 text-rose-800 border border-rose-200 flex items-center';
+                        alertBox.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-2 text-rose-600"></i> ${DAYS[i]}: Start time must be earlier than end time.`;
+                        alertBox.classList.remove('hidden');
+                        return;
+                    }
+                    payloadItems.push({
+                        day_of_week: i,
+                        start_time: startTime + ':00',
+                        end_time: endTime + ':00',
+                        is_working: true
+                    });
+                } else {
+                    payloadItems.push({
+                        day_of_week: i,
+                        start_time: '00:00:00',
+                        end_time: '00:00:00',
+                        is_working: false
+                    });
+                }
+            }
+
+            btnText.textContent = 'Saving Schedule...';
+            btnSpinner.classList.remove('hidden');
+            saveBtn.disabled = true;
+            alertBox.classList.add('hidden');
+
+            const res = await api.put(`/api/admin/doctors/${doctorId}/working-hours`, { working_hours: payloadItems });
+
+            btnText.textContent = 'Save Weekly Schedule';
+            btnSpinner.classList.add('hidden');
+            saveBtn.disabled = false;
+
+            if (res.success) {
+                alertBox.className = 'my-4 p-4 rounded-xl text-sm bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center';
+                alertBox.innerHTML = `<i class="fa-solid fa-circle-check mr-2 text-emerald-600"></i> Weekly working hours saved successfully!`;
+                alertBox.classList.remove('hidden');
+                showToast('Working hours updated successfully!', 'success');
+            } else {
+                alertBox.className = 'my-4 p-4 rounded-xl text-sm bg-rose-50 text-rose-800 border border-rose-200 flex items-center';
+                alertBox.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-2 text-rose-600"></i> ${res.error || 'Failed to save working hours'}`;
+                alertBox.classList.remove('hidden');
+                showToast(res.error || 'Update failed', 'error');
+            }
+        });
+
+        // ================= LEAVES LOGIC =================
+
+        async function fetchDoctorLeaves() {
+            const refreshIcon = document.getElementById('refresh-leaves-icon');
+            if (refreshIcon) refreshIcon.classList.add('fa-spin');
+
+            const res = await api.get(`/api/admin/doctors/${doctorId}/leaves`);
+            if (refreshIcon) refreshIcon.classList.remove('fa-spin');
+
+            const tbody = document.getElementById('leaves-tbody');
+
+            if (res.success && Array.isArray(res.data)) {
+                const leaves = res.data;
+
+                if (leaves.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="5" class="px-6 py-10 text-center text-slate-400">
+                                <i class="fa-solid fa-calendar-check text-2xl text-emerald-500 mb-2"></i>
+                                <p class="font-semibold text-slate-700">No leaves scheduled</p>
+                                <p class="text-xs text-slate-500 mt-0.5">Doctor is on normal working schedule.</p>
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+
+                tbody.innerHTML = leaves.map(l => {
+                    const d = new Date(l.leave_date + 'T00:00:00');
+                    const dayName = DAYS[d.getDay() === 0 ? 6 : d.getDay() - 1];
+                    const isUpcoming = l.leave_date >= new Date().toISOString().split('T')[0];
+
+                    return `
+                        <tr class="hover:bg-slate-50/80 transition-colors">
+                            <td class="px-6 py-4 font-bold text-slate-900">
+                                <span class="inline-flex items-center">
+                                    <i class="fa-regular fa-calendar mr-2 text-indigo-500"></i> ${l.leave_date}
+                                    ${isUpcoming ? '<span class="ml-2 text-2xs px-2 py-0.5 bg-sky-50 text-sky-700 rounded-full font-semibold border border-sky-200">Upcoming</span>' : ''}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-slate-600 font-medium">${dayName}</td>
+                            <td class="px-6 py-4 text-slate-700">${l.reason || '<span class="text-slate-400 italic">No reason provided</span>'}</td>
+                            <td class="px-6 py-4 text-xs text-slate-500">${l.created_at ? l.created_at.substring(0, 10) : 'N/A'}</td>
+                            <td class="px-6 py-4 text-right">
+                                <button onclick="deleteDoctorLeave(${l.id}, '${l.leave_date}')" class="px-2.5 py-1 text-xs font-semibold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg transition-colors">
+                                    <i class="fa-solid fa-trash mr-1"></i> Cancel
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            } else {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="px-6 py-6 text-center text-rose-600 font-medium">
+                            Failed to load leaves: ${res.error || 'Server error'}
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        document.getElementById('add-leave-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const leaveDate = document.getElementById('leave_date').value;
+            const reason = document.getElementById('leave_reason').value.trim();
+            const alertBox = document.getElementById('leave-alert-box');
+            const submitBtn = document.getElementById('add-leave-btn');
+            const btnText = document.getElementById('add-leave-text');
+            const btnSpinner = document.getElementById('add-leave-spinner');
+
+            btnText.textContent = 'Scheduling...';
+            btnSpinner.classList.remove('hidden');
+            submitBtn.disabled = true;
+            alertBox.classList.add('hidden');
+
+            const res = await api.post(`/api/admin/doctors/${doctorId}/leaves`, {
+                leave_date: leaveDate,
+                reason: reason || null
+            });
+
+            btnText.innerHTML = '<i class="fa-solid fa-plus mr-1.5"></i> Schedule Leave';
+            btnSpinner.classList.add('hidden');
+            submitBtn.disabled = false;
+
+            if (res.success && res.data) {
+                const data = res.data;
+                const affectedCount = data.affected_appointments_count || data.conflicting_appointments_count || 0;
+                let alertHtml = `<i class="fa-solid fa-circle-check mr-2 text-emerald-600 text-lg"></i> ${data.message}`;
+
+                if (affectedCount > 0) {
+                    alertBox.className = 'mb-6 p-5 rounded-2xl text-sm bg-amber-50 text-amber-900 border border-amber-200 shadow-sm';
+                    
+                    const patientsListHtml = (data.patients_to_notify || []).map(p => `
+                        <li class="flex items-center justify-between py-1.5 border-b border-amber-100 text-xs">
+                            <span class="font-bold text-amber-900"><i class="fa-solid fa-user-injured mr-1.5 text-amber-600"></i> ${p.patient_name}</span>
+                            <span class="text-amber-700 font-mono">${p.start_time.substring(0, 5)}</span>
+                            <span class="text-2xs text-amber-600">${p.patient_email}</span>
+                        </li>
+                    `).join('');
+
+                    alertHtml = `
+                        <div class="space-y-3">
+                            <div class="flex items-start">
+                                <i class="fa-solid fa-triangle-exclamation text-amber-600 text-xl mr-3 mt-0.5"></i>
+                                <div>
+                                    <h4 class="font-extrabold text-amber-900 text-base">Doctor Leave Scheduled & Conflicts Handled</h4>
+                                    <p class="text-xs text-amber-700 mt-0.5">${data.message}</p>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 py-2">
+                                <div class="bg-amber-100/60 p-2.5 rounded-xl text-center">
+                                    <div class="text-lg font-black text-amber-900">${affectedCount}</div>
+                                    <div class="text-2xs font-semibold text-amber-700">Appointments Cancelled</div>
+                                </div>
+                                <div class="bg-amber-100/60 p-2.5 rounded-xl text-center">
+                                    <div class="text-lg font-black text-amber-900">${data.notifications_prepared || affectedCount}</div>
+                                    <div class="text-2xs font-semibold text-amber-700">Notifications Prepared</div>
+                                </div>
+                                <div class="bg-amber-100/60 p-2.5 rounded-xl text-center">
+                                    <div class="text-lg font-black text-amber-900">${data.calendar_sync_jobs_prepared || affectedCount}</div>
+                                    <div class="text-2xs font-semibold text-amber-700">Calendar Sync Jobs</div>
+                                </div>
+                            </div>
+
+                            ${data.patients_to_notify && data.patients_to_notify.length > 0 ? `
+                                <div class="pt-2">
+                                    <p class="text-2xs font-bold uppercase tracking-wider text-amber-800 mb-1">Affected Patients Queued for Notification:</p>
+                                    <ul class="divide-y divide-amber-100 bg-white/70 p-3 rounded-xl border border-amber-200/60 max-h-40 overflow-y-auto">
+                                        ${patientsListHtml}
+                                    </ul>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                } else {
+                    alertBox.className = 'mb-6 p-4 rounded-xl text-sm bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center';
+                }
+
+                alertBox.innerHTML = alertHtml;
+                alertBox.classList.remove('hidden');
+                document.getElementById('leave_reason').value = '';
+                showToast(`Leave scheduled for ${leaveDate}!`, 'success');
+                fetchDoctorLeaves();
+            } else {
+                alertBox.className = 'mb-6 p-4 rounded-xl text-sm bg-rose-50 text-rose-800 border border-rose-200 flex items-center';
+                alertBox.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-2 text-rose-600"></i> ${res.error || 'Failed to schedule leave'}`;
+                alertBox.classList.remove('hidden');
+                showToast(res.error || 'Failed to schedule leave', 'error');
+            }
+        });
+
+        async function deleteDoctorLeave(leaveId, leaveDate) {
+            if (!confirm(`Are you sure you want to cancel the leave scheduled on ${leaveDate}?`)) return;
+
+            const res = await api.delete(`/api/admin/doctors/${doctorId}/leaves/${leaveId}`);
+            if (res.success) {
+                showToast(`Leave on ${leaveDate} has been cancelled.`, 'success');
+                fetchDoctorLeaves();
+            } else {
+                showToast(res.error || 'Failed to cancel leave', 'error');
+            }
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.className = `fixed bottom-5 right-5 z-50 max-w-md p-4 rounded-xl shadow-lg border text-sm transition-all transform ease-out duration-300 flex items-center ${
+                type === 'success' 
+                    ? 'bg-emerald-900 text-white border-emerald-700' 
+                    : 'bg-rose-900 text-white border-rose-700'
+            }`;
+            toast.innerHTML = `
+                <i class="fa-solid ${type === 'success' ? 'fa-circle-check text-emerald-400' : 'fa-triangle-exclamation text-rose-400'} text-lg mr-3"></i>
+                <span>${message}</span>
+            `;
+            toast.classList.remove('hidden');
+
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3500);
+        }
+    </script>
+</body>
+</html>
