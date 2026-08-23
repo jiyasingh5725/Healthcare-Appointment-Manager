@@ -1,3 +1,4 @@
+import logging
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session, joinedload
 
@@ -5,6 +6,8 @@ from app.database import get_db
 from app.models.user import User
 from app.models.doctor import Doctor
 from app.models.appointment import Appointment, AppointmentStatus
+
+logger = logging.getLogger(__name__)
 from app.utils.dependencies import require_doctor
 from app.schemas.doctor import (
     DoctorResponse,
@@ -160,5 +163,24 @@ def update_appointment_status_by_doctor(
 
     db.commit()
     db.refresh(appointment)
+
+    # Trigger asynchronous notifications decoupled from DB transaction
+    if new_status == AppointmentStatus.COMPLETED:
+        try:
+            from app.tasks import dispatch_async_task, send_appointment_completed_notifications_task
+            dispatch_async_task(send_appointment_completed_notifications_task, appointment.id)
+        except Exception as err:
+            logger.warning(f"[DoctorPortal] Non-blocking completion notification dispatch failed: {err}")
+    elif new_status == AppointmentStatus.CANCELLED:
+        try:
+            from app.tasks import dispatch_async_task, send_appointment_cancellation_email_task
+            dispatch_async_task(
+                send_appointment_cancellation_email_task,
+                appointment.id,
+                payload.cancellation_reason or "Cancelled by Physician",
+                "Physician"
+            )
+        except Exception as err:
+            logger.warning(f"[DoctorPortal] Non-blocking cancellation notification dispatch failed: {err}")
 
     return _serialize_appointment(appointment)

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +10,7 @@
     <link rel="stylesheet" href="../css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
+
 <body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col font-sans">
 
     <!-- Top Navigation -->
@@ -16,19 +18,24 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <div class="flex items-center space-x-6">
                 <a href="dashboard.html" class="flex items-center space-x-2.5 text-indigo-600 font-extrabold text-xl">
-                    <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center text-white text-base shadow-sm">
+                    <div
+                        class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center text-white text-base shadow-sm">
                         <i class="fa-solid fa-shield-halved"></i>
                     </div>
-                    <span>CareSync <span class="text-xs font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-200">Admin</span></span>
+                    <span>CareSync <span
+                            class="text-xs font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-200">Admin</span></span>
                 </a>
                 <nav class="hidden md:flex items-center space-x-1 text-sm font-medium">
-                    <a href="dashboard.html" class="px-3.5 py-2 text-indigo-600 bg-indigo-50 rounded-xl font-semibold flex items-center">
+                    <a href="dashboard.html"
+                        class="px-3.5 py-2 text-indigo-600 bg-indigo-50 rounded-xl font-semibold flex items-center">
                         <i class="fa-solid fa-gauge mr-2"></i> Dashboard
                     </a>
-                    <a href="doctors.html" class="px-3.5 py-2 text-slate-600 hover:text-indigo-600 hover:bg-slate-50 rounded-xl transition-colors flex items-center">
+                    <a href="doctors.html"
+                        class="px-3.5 py-2 text-slate-600 hover:text-indigo-600 hover:bg-slate-50 rounded-xl transition-colors flex items-center">
                         <i class="fa-solid fa-user-doctor mr-2"></i> Doctors
                     </a>
-                    <a href="create-doctor.html" class="px-3.5 py-2 text-slate-600 hover:text-indigo-600 hover:bg-slate-50 rounded-xl transition-colors flex items-center">
+                    <a href="create-doctor.html"
+                        class="px-3.5 py-2 text-slate-600 hover:text-indigo-600 hover:bg-slate-50 rounded-xl transition-colors flex items-center">
                         <i class="fa-solid fa-user-plus mr-2"></i> Add Doctor
                     </a>
                 </nav>
@@ -39,7 +46,8 @@
                     <div id="admin-display-name" class="text-xs font-bold text-slate-800">Administrator</div>
                     <div id="admin-display-email" class="text-2xs text-slate-500">admin@example.com</div>
                 </div>
-                <button onclick="auth.logout('../login.html')" class="px-3 py-2 text-xs font-semibold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-xl border border-rose-200 transition-colors flex items-center">
+                <button onclick="auth.logout('../login.html')"
+                    class="px-3 py-2 text-xs font-semibold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-xl border border-rose-200 transition-colors flex items-center">
                     <i class="fa-solid fa-arrow-right-from-bracket mr-1.5"></i> Logout
                 </button>
             </div>
@@ -48,24 +56,31 @@
 
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow space-y-8">
-        
+
         <!-- Welcome Hero -->
-        <div class="bg-gradient-to-r from-indigo-900 via-indigo-800 to-purple-900 rounded-3xl p-6 sm:p-10 text-white shadow-xl relative overflow-hidden">
-            <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
+        <div
+            class="bg-gradient-to-r from-indigo-900 via-indigo-800 to-purple-900 rounded-3xl p-6 sm:p-10 text-white shadow-xl relative overflow-hidden">
+            <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-white/10 rounded-full blur-2xl pointer-events-none">
+            </div>
             <div class="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
                 <div>
-                    <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-sm text-xs font-medium text-indigo-100 mb-3">
+                    <div
+                        class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-sm text-xs font-medium text-indigo-100 mb-3">
                         <i class="fa-solid fa-server text-indigo-300"></i>
                         <span>Central Hospital Management Panel</span>
                     </div>
-                    <h1 class="text-2xl sm:text-4xl font-extrabold tracking-tight">Welcome, <span id="admin-greeting-name">Administrator</span></h1>
-                    <p class="mt-1 text-indigo-100 text-sm sm:text-base">Monitor hospital capacity, doctor leaves & conflicts, appointment transactions, and email notification health.</p>
+                    <h1 class="text-2xl sm:text-4xl font-extrabold tracking-tight">Welcome, <span
+                            id="admin-greeting-name">Administrator</span></h1>
+                    <p class="mt-1 text-indigo-100 text-sm sm:text-base">Monitor hospital capacity, doctor leaves &
+                        conflicts, appointment transactions, and email notification health.</p>
                 </div>
                 <div class="flex items-center space-x-3">
-                    <button onclick="loadAllMetrics()" class="px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-2xl text-xs font-bold backdrop-blur-sm border border-white/20 transition-all flex items-center">
-                        <i class="fa-solid fa-arrows-rotate mr-2"></i> Refresh Data
+                    <button id="btn-refresh-data" onclick="loadAllMetrics(true)"
+                        class="px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-2xl text-xs font-bold backdrop-blur-sm border border-white/20 transition-all flex items-center shadow-sm active:scale-95">
+                        <i id="refresh-data-icon" class="fa-solid fa-arrows-rotate mr-2 transition-transform"></i> Refresh Data
                     </button>
-                    <a href="create-doctor.html" class="px-5 py-2.5 bg-white text-indigo-900 hover:bg-indigo-50 rounded-2xl text-xs font-extrabold shadow-lg transition-all flex items-center">
+                    <a href="create-doctor.html"
+                        class="px-5 py-2.5 bg-white text-indigo-900 hover:bg-indigo-50 rounded-2xl text-xs font-extrabold shadow-lg transition-all flex items-center">
                         <i class="fa-solid fa-user-plus mr-2 text-indigo-600"></i> Add Doctor
                     </a>
                 </div>
@@ -79,15 +94,16 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Users</p>
-                        <p id="metric-total-users" class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-1">--</p>
+                        <p id="metric-total-users" class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-1">0</p>
                     </div>
-                    <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl shadow-inner">
+                    <div
+                        class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl shadow-inner">
                         <i class="fa-solid fa-users"></i>
                     </div>
                 </div>
                 <div class="mt-4 pt-3 border-t border-slate-100 text-xs text-slate-500 flex justify-between">
-                    <span>Patients: <strong id="metric-patients-count" class="text-slate-700">--</strong></span>
-                    <span>Staff: <strong id="metric-staff-count" class="text-slate-700">--</strong></span>
+                    <span>Patients: <strong id="metric-patients-count" class="text-slate-700">0</strong></span>
+                    <span>Staff: <strong id="metric-staff-count" class="text-slate-700">0</strong></span>
                 </div>
             </div>
 
@@ -96,14 +112,15 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Active Doctors</p>
-                        <p id="metric-active-doctors" class="text-2xl sm:text-3xl font-extrabold text-emerald-600 mt-1">--</p>
+                        <p id="metric-active-doctors" class="text-2xl sm:text-3xl font-extrabold text-emerald-600 mt-1">0</p>
                     </div>
-                    <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl shadow-inner">
+                    <div
+                        class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl shadow-inner">
                         <i class="fa-solid fa-user-doctor"></i>
                     </div>
                 </div>
                 <div class="mt-4 pt-3 border-t border-slate-100 text-xs text-slate-500 flex justify-between">
-                    <span>Total: <strong id="metric-total-doctors" class="text-slate-700">--</strong></span>
+                    <span>Total: <strong id="metric-total-doctors" class="text-slate-700">0</strong></span>
                     <a href="doctors.html" class="text-indigo-600 font-bold hover:underline">Manage</a>
                 </div>
             </div>
@@ -113,15 +130,16 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Appointments</p>
-                        <p id="metric-total-appointments" class="text-2xl sm:text-3xl font-extrabold text-sky-600 mt-1">--</p>
+                        <p id="metric-total-appointments" class="text-2xl sm:text-3xl font-extrabold text-sky-600 mt-1">0</p>
                     </div>
-                    <div class="w-12 h-12 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center text-xl shadow-inner">
+                    <div
+                        class="w-12 h-12 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center text-xl shadow-inner">
                         <i class="fa-solid fa-calendar-check"></i>
                     </div>
                 </div>
                 <div class="mt-4 pt-3 border-t border-slate-100 text-xs text-slate-500 flex justify-between">
-                    <span>Confirmed: <strong id="metric-confirmed-apps" class="text-emerald-600">--</strong></span>
-                    <span>Done: <strong id="metric-completed-apps" class="text-sky-600">--</strong></span>
+                    <span>Confirmed: <strong id="metric-confirmed-apps" class="text-emerald-600">0</strong></span>
+                    <span>Done: <strong id="metric-completed-apps" class="text-sky-600">0</strong></span>
                 </div>
             </div>
 
@@ -130,14 +148,15 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Leave Conflicts</p>
-                        <p id="metric-leave-conflicts" class="text-2xl sm:text-3xl font-extrabold text-amber-600 mt-1">--</p>
+                        <p id="metric-leave-conflicts" class="text-2xl sm:text-3xl font-extrabold text-amber-600 mt-1">0</p>
                     </div>
-                    <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl shadow-inner">
+                    <div
+                        class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl shadow-inner">
                         <i class="fa-solid fa-user-clock"></i>
                     </div>
                 </div>
                 <div class="mt-4 pt-3 border-t border-slate-100 text-xs text-slate-500 flex justify-between">
-                    <span>Doctor Leaves: <strong id="metric-total-leaves" class="text-slate-700">--</strong></span>
+                    <span>Doctor Leaves: <strong id="metric-total-leaves" class="text-slate-700">0</strong></span>
                     <span class="text-emerald-600 font-bold">Auto-Resolved</span>
                 </div>
             </div>
@@ -147,30 +166,34 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Delivery Rate</p>
-                        <p id="metric-notif-rate" class="text-2xl sm:text-3xl font-extrabold text-purple-600 mt-1">--%</p>
+                        <p id="metric-notif-rate" class="text-2xl sm:text-3xl font-extrabold text-purple-600 mt-1">100%</p>
                     </div>
-                    <div class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center text-xl shadow-inner">
+                    <div
+                        class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center text-xl shadow-inner">
                         <i class="fa-solid fa-paper-plane"></i>
                     </div>
                 </div>
                 <div class="mt-4 pt-3 border-t border-slate-100 text-xs text-slate-500 flex justify-between">
-                    <span>Failures: <strong id="metric-notif-failed" class="text-rose-600">--</strong></span>
-                    <span>Sent: <strong id="metric-notif-sent" class="text-emerald-600">--</strong></span>
+                    <span>Failures: <strong id="metric-notif-failed" class="text-rose-600">0</strong></span>
+                    <span>Sent: <strong id="metric-notif-sent" class="text-emerald-600">0</strong></span>
                 </div>
             </div>
         </section>
 
         <!-- Doctor Staff Directory -->
         <section class="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden">
-            <div class="px-6 py-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div
+                class="px-6 py-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <h2 class="text-lg font-extrabold text-slate-900 flex items-center">
                         <i class="fa-solid fa-user-doctor text-indigo-600 mr-2.5"></i> Hospital Medical Staff Directory
                     </h2>
-                    <p class="text-xs text-slate-500 mt-0.5">Physicians, active working schedules, slot durations, and account statuses.</p>
+                    <p class="text-xs text-slate-500 mt-0.5">Physicians, active working schedules, slot durations, and
+                        account statuses.</p>
                 </div>
                 <div class="flex items-center space-x-3">
-                    <a href="doctors.html" class="px-4 py-2 text-xs font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-xl transition-colors">
+                    <a href="doctors.html"
+                        class="px-4 py-2 text-xs font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-xl transition-colors">
                         Manage All Doctors <i class="fa-solid fa-arrow-right ml-1"></i>
                     </a>
                 </div>
@@ -203,20 +226,25 @@
 
         <!-- Notification & Email Delivery Monitor -->
         <section class="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden">
-            <div class="px-6 py-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div
+                class="px-6 py-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <div class="flex items-center space-x-2.5">
                         <h2 class="text-lg font-extrabold text-slate-900 flex items-center">
-                            <i class="fa-solid fa-envelope-circle-check text-indigo-600 mr-2.5"></i> Email & System Notification Monitor
+                            <i class="fa-solid fa-envelope-circle-check text-indigo-600 mr-2.5"></i> Email & System
+                            Notification Monitor
                         </h2>
-                        <span id="notif-provider-badge" class="px-2.5 py-0.5 rounded-full text-2xs font-extrabold bg-indigo-50 text-indigo-700 uppercase tracking-wide border border-indigo-200">
+                        <span id="notif-provider-badge"
+                            class="px-2.5 py-0.5 rounded-full text-2xs font-extrabold bg-indigo-50 text-indigo-700 uppercase tracking-wide border border-indigo-200">
                             MOCK
                         </span>
                     </div>
-                    <p class="text-xs text-slate-500 mt-0.5">Real-time status tracking for appointment confirmations, doctor schedule notices, and reminders.</p>
+                    <p class="text-xs text-slate-500 mt-0.5">Real-time status tracking for appointment confirmations,
+                        doctor schedule notices, and reminders.</p>
                 </div>
                 <div class="flex items-center space-x-2">
-                    <button onclick="loadNotificationMonitor()" class="px-3.5 py-2 text-xs font-bold text-slate-700 hover:text-indigo-600 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl transition-all flex items-center">
+                    <button onclick="loadNotificationMonitor()"
+                        class="px-3.5 py-2 text-xs font-bold text-slate-700 hover:text-indigo-600 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl transition-all flex items-center">
                         <i class="fa-solid fa-arrows-rotate mr-1.5"></i> Refresh Logs
                     </button>
                 </div>
@@ -266,15 +294,32 @@
             document.getElementById('admin-display-email').textContent = user.email;
             document.getElementById('admin-greeting-name').textContent = user.name;
 
-            loadAllMetrics();
+            await loadAllMetrics();
+
+            // Set up real-time live background polling every 8 seconds
+            setInterval(() => {
+                loadNotificationMonitor(false);
+                loadSystemMetrics();
+            }, 8000);
         });
 
-        async function loadAllMetrics() {
-            await Promise.all([
-                loadSystemMetrics(),
-                loadDoctorsData(),
-                loadNotificationMonitor()
-            ]);
+        async function loadAllMetrics(isManual = false) {
+            const refreshIcon = document.getElementById('refresh-data-icon');
+            if (isManual && refreshIcon) {
+                refreshIcon.classList.add('fa-spin');
+            }
+
+            try {
+                await Promise.all([
+                    loadSystemMetrics(),
+                    loadDoctorsData(),
+                    loadNotificationMonitor(isManual)
+                ]);
+            } finally {
+                if (refreshIcon) {
+                    setTimeout(() => refreshIcon.classList.remove('fa-spin'), 500);
+                }
+            }
         }
 
         async function loadSystemMetrics() {
@@ -282,23 +327,33 @@
                 const res = await api.get('/api/admin/metrics');
                 if (res.success && res.data) {
                     const d = res.data;
-                    document.getElementById('metric-total-users').textContent = d.users.total;
-                    document.getElementById('metric-patients-count').textContent = d.users.patients;
-                    document.getElementById('metric-staff-count').textContent = d.users.doctors;
                     
-                    document.getElementById('metric-active-doctors').textContent = d.users.active_doctors;
-                    document.getElementById('metric-total-doctors').textContent = d.users.doctors;
-                    
-                    document.getElementById('metric-total-appointments').textContent = d.appointments.total;
-                    document.getElementById('metric-confirmed-apps').textContent = d.appointments.confirmed;
-                    document.getElementById('metric-completed-apps').textContent = d.appointments.completed;
+                    // Total Users
+                    document.getElementById('metric-total-users').textContent = d.users?.total ?? 0;
+                    document.getElementById('metric-patients-count').textContent = d.users?.patients ?? 0;
+                    document.getElementById('metric-staff-count').textContent = d.users?.staff ?? d.users?.doctors ?? 0;
 
-                    document.getElementById('metric-leave-conflicts').textContent = d.leaves.leave_conflicts_resolved;
-                    document.getElementById('metric-total-leaves').textContent = d.leaves.total_leaves;
+                    // Active Doctors
+                    document.getElementById('metric-active-doctors').textContent = d.users?.active_doctors ?? 0;
+                    document.getElementById('metric-total-doctors').textContent = d.users?.doctors ?? 0;
 
-                    document.getElementById('metric-notif-rate').textContent = d.notifications.success_rate + '%';
-                    document.getElementById('metric-notif-failed').textContent = d.notifications.failed;
-                    document.getElementById('metric-notif-sent').textContent = d.notifications.sent;
+                    // Appointments Overview
+                    document.getElementById('metric-total-appointments').textContent = d.appointments?.total ?? 0;
+                    document.getElementById('metric-confirmed-apps').textContent = d.appointments?.confirmed ?? 0;
+                    document.getElementById('metric-completed-apps').textContent = d.appointments?.completed ?? 0;
+
+                    // Leave Conflicts
+                    document.getElementById('metric-leave-conflicts').textContent = d.leaves?.leave_conflicts_resolved ?? 0;
+                    document.getElementById('metric-total-leaves').textContent = d.leaves?.total_leaves ?? 0;
+
+                    // Notifications Health
+                    if (d.notifications) {
+                        document.getElementById('metric-notif-rate').textContent = (d.notifications.success_rate ?? 100) + '%';
+                        document.getElementById('metric-notif-failed').textContent = d.notifications.failed ?? 0;
+                        document.getElementById('metric-notif-sent').textContent = d.notifications.sent ?? 0;
+                    }
+                } else {
+                    console.warn('[AdminMetrics] API returned unsuccessful response:', res.error);
                 }
             } catch (err) {
                 console.error('Failed to load system metrics:', err);
@@ -356,10 +411,10 @@
                             ${doc.slot_duration} mins
                         </td>
                         <td class="px-6 py-4">
-                            ${doc.is_active 
-                                ? '<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200"><span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-emerald-500"></span>Active</span>'
-                                : '<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-600 border border-slate-200"><span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-slate-400"></span>Inactive</span>'
-                            }
+                            ${doc.is_active
+                        ? '<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200"><span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-emerald-500"></span>Active</span>'
+                        : '<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-600 border border-slate-200"><span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-slate-400"></span>Inactive</span>'
+                    }
                         </td>
                         <td class="px-6 py-4 text-right space-x-2">
                             <a href="doctor-schedule.html?id=${doc.id}" class="px-3 py-1.5 text-xs font-bold text-slate-700 hover:text-indigo-600 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-2xs transition-all inline-flex items-center">
@@ -382,60 +437,168 @@
             }
         }
 
-        async function loadNotificationMonitor() {
+        function formatEventType(type) {
+            if (!type) return 'Notification';
+            const map = {
+                'BOOKING_CONFIRMATION': 'Booking Confirmation',
+                'APPOINTMENT_REMINDER': 'Appointment Reminder',
+                'CANCELLATION': 'Cancellation Notice',
+                'RESCHEDULE': 'Reschedule Notice',
+                'LEAVE_NOTIFICATION': 'Doctor Leave Notice',
+                'MEDICATION_REMINDER': 'Medication Reminder',
+                'CONSULTATION_SUMMARY': 'Consultation Summary',
+                'SYSTEM_ALERT': 'System Alert'
+            };
+            return map[type] || type.replace(/_/g, ' ');
+        }
+
+        async function loadNotificationMonitor(isManual = false) {
             const tbody = document.getElementById('notification-logs-tbody');
+            const providerBadge = document.getElementById('notif-provider-badge');
+            const refreshIcon = document.getElementById('refresh-logs-icon');
 
-            const logsRes = await api.get('/notifications/admin/logs?limit=8');
-            if (logsRes.ok && logsRes.data && logsRes.data.logs) {
-                const logs = logsRes.data.logs;
-                if (logs.length === 0) {
-                    tbody.innerHTML = `
-                        <tr>
-                            <td colspan="6" class="px-6 py-10 text-center text-slate-400 text-xs font-semibold">
-                                <i class="fa-regular fa-envelope-open text-xl mb-1.5 block text-slate-300"></i>
-                                No email notification events recorded yet.
-                            </td>
-                        </tr>
-                    `;
-                    return;
-                }
+            if (isManual && refreshIcon) {
+                refreshIcon.classList.add('fa-spin');
+            }
 
-                tbody.innerHTML = logs.map(l => {
-                    let statusBadge = '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-2xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200"><i class="fa-solid fa-check mr-1"></i> SENT</span>';
-                    if (l.status === 'FAILED') {
-                        statusBadge = '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-2xs font-bold bg-rose-50 text-rose-700 border border-rose-200"><i class="fa-solid fa-triangle-exclamation mr-1"></i> FAILED</span>';
-                    } else if (l.status === 'RETRYING') {
-                        statusBadge = '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-2xs font-bold bg-amber-50 text-amber-700 border border-amber-200"><i class="fa-solid fa-rotate mr-1"></i> RETRYING</span>';
-                    } else if (l.status === 'PENDING') {
-                        statusBadge = '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-2xs font-bold bg-slate-100 text-slate-700 border border-slate-200"><i class="fa-solid fa-clock mr-1"></i> PENDING</span>';
+            try {
+                // Fetch stats and logs concurrently
+                const [statsRes, logsRes] = await Promise.all([
+                    api.get('/api/notifications/admin/stats'),
+                    api.get('/api/notifications/admin/logs?limit=10')
+                ]);
+
+                // Update active provider badge and top metrics if available
+                if (statsRes.success && statsRes.data) {
+                    const s = statsRes.data;
+                    const provider = (s.provider || 'smtp').toUpperCase();
+                    if (providerBadge) {
+                        providerBadge.textContent = provider;
+                        if (provider === 'SMTP') {
+                            providerBadge.className = 'px-2.5 py-0.5 rounded-full text-2xs font-extrabold bg-emerald-50 text-emerald-700 uppercase tracking-wide border border-emerald-200';
+                        } else if (provider === 'SENDGRID' || provider === 'MAILGUN') {
+                            providerBadge.className = 'px-2.5 py-0.5 rounded-full text-2xs font-extrabold bg-cyan-50 text-cyan-700 uppercase tracking-wide border border-cyan-200';
+                        } else {
+                            providerBadge.className = 'px-2.5 py-0.5 rounded-full text-2xs font-extrabold bg-indigo-50 text-indigo-700 uppercase tracking-wide border border-indigo-200';
+                        }
                     }
 
-                    return `
-                        <tr class="hover:bg-slate-50/80 transition-colors">
-                            <td class="px-6 py-3.5">
-                                <div class="font-bold text-slate-800 text-xs">${l.recipient_name}</div>
-                                <div class="text-2xs text-slate-500">${l.recipient_email}</div>
-                            </td>
-                            <td class="px-6 py-3.5">
-                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-2xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-100">
-                                    ${l.notification_type}
-                                </span>
-                            </td>
-                            <td class="px-6 py-3.5 text-xs text-slate-600 font-semibold">
-                                <i class="fa-regular fa-envelope mr-1 text-slate-400"></i> ${l.channel}
-                            </td>
-                            <td class="px-6 py-3.5">${statusBadge}</td>
-                            <td class="px-6 py-3.5 text-xs text-slate-600 font-mono font-bold">
-                                ${l.retry_count > 0 ? `<span class="text-amber-600">${l.retry_count} / 3</span>` : '0 / 3'}
-                            </td>
-                            <td class="px-6 py-3.5 text-xs text-slate-500">
-                                ${l.sent_at ? new Date(l.sent_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : (l.error_message ? `<span class="text-rose-500 truncate max-w-xs block" title="${l.error_message}">${l.error_message}</span>` : 'Queued')}
+                    if (document.getElementById('metric-notif-rate')) {
+                        document.getElementById('metric-notif-rate').textContent = (s.success_rate_percentage ?? '100') + '%';
+                    }
+                    if (document.getElementById('metric-notif-failed')) {
+                        document.getElementById('metric-notif-failed').textContent = s.failed_count ?? '0';
+                    }
+                    if (document.getElementById('metric-notif-sent')) {
+                        document.getElementById('metric-notif-sent').textContent = s.sent_count ?? '0';
+                    }
+                }
+
+                // Render Logs Table
+                if (logsRes.success && logsRes.data && Array.isArray(logsRes.data.logs)) {
+                    const logs = logsRes.data.logs;
+
+                    if (logs.length === 0) {
+                        tbody.innerHTML = `
+                            <tr>
+                                <td colspan="6" class="px-6 py-12 text-center text-slate-400">
+                                    <div class="w-12 h-12 rounded-2xl bg-slate-50 text-slate-400 flex items-center justify-center text-xl mx-auto mb-2 shadow-inner">
+                                        <i class="fa-regular fa-envelope-open"></i>
+                                    </div>
+                                    <h4 class="font-bold text-slate-700 text-xs">No notifications recorded yet</h4>
+                                    <p class="text-2xs text-slate-400 mt-0.5">Notification events will appear here when appointments are booked or completed.</p>
+                                </td>
+                            </tr>
+                        `;
+                        return;
+                    }
+
+                    tbody.innerHTML = logs.map(l => {
+                        const statusUpper = (l.status || 'SENT').toUpperCase();
+                        let statusBadge = '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-2xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200"><i class="fa-solid fa-check mr-1 text-3xs"></i> SENT</span>';
+
+                        if (statusUpper === 'FAILED') {
+                            statusBadge = '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-2xs font-bold bg-rose-50 text-rose-700 border border-rose-200"><i class="fa-solid fa-triangle-exclamation mr-1 text-3xs"></i> FAILED</span>';
+                        } else if (statusUpper === 'RETRYING') {
+                            statusBadge = '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-2xs font-bold bg-amber-50 text-amber-700 border border-amber-200"><i class="fa-solid fa-rotate fa-spin mr-1 text-3xs"></i> RETRYING</span>';
+                        } else if (statusUpper === 'PENDING' || statusUpper === 'QUEUED') {
+                            statusBadge = '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-2xs font-bold bg-blue-50 text-blue-700 border border-blue-200"><i class="fa-solid fa-clock mr-1 text-3xs"></i> QUEUED</span>';
+                        } else if (statusUpper === 'DELIVERED') {
+                            statusBadge = '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-2xs font-bold bg-teal-50 text-teal-700 border border-teal-200"><i class="fa-solid fa-circle-check mr-1 text-3xs"></i> DELIVERED</span>';
+                        }
+
+                        const eventLabel = formatEventType(l.notification_type);
+
+                        // Formatted timestamp
+                        let timeStr = 'Queued';
+                        if (l.sent_at) {
+                            try {
+                                const dt = new Date(l.sent_at);
+                                timeStr = dt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ', ' + dt.toLocaleDateString([], { month: 'short', day: 'numeric' });
+                            } catch (e) {
+                                timeStr = l.sent_at;
+                            }
+                        } else if (l.error_message) {
+                            timeStr = `<span class="text-rose-600 font-medium text-2xs block truncate max-w-xs" title="${l.error_message.replace(/"/g, '&quot;')}"><i class="fa-solid fa-circle-exclamation mr-1"></i>${l.error_message}</span>`;
+                        }
+
+                        return `
+                            <tr class="hover:bg-slate-50/80 transition-colors">
+                                <td class="px-6 py-3.5">
+                                    <div class="font-bold text-slate-800 text-xs">${l.recipient_name || 'Anonymous Recipient'}</div>
+                                    <div class="text-2xs text-slate-500 font-mono">${l.recipient_email || 'No email attached'}</div>
+                                </td>
+                                <td class="px-6 py-3.5">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-2xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-100">
+                                        ${eventLabel}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-3.5 text-xs text-slate-600 font-semibold">
+                                    <i class="fa-regular fa-envelope mr-1 text-slate-400"></i> ${l.channel || 'EMAIL'}
+                                </td>
+                                <td class="px-6 py-3.5">${statusBadge}</td>
+                                <td class="px-6 py-3.5 text-xs text-slate-600 font-mono font-bold">
+                                    ${(l.retry_count && l.retry_count > 0) ? `<span class="text-amber-600">${l.retry_count} / 3</span>` : '0 / 3'}
+                                </td>
+                                <td class="px-6 py-3.5 text-xs text-slate-500">
+                                    ${timeStr}
+                                </td>
+                            </tr>
+                        `;
+                    }).join('');
+                } else {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="6" class="px-6 py-8 text-center text-rose-600 font-semibold text-xs">
+                                <i class="fa-solid fa-circle-exclamation mr-1.5 text-sm"></i>
+                                Failed to load notification logs: ${logsRes.error || 'Server unreachable'}.
+                                <button onclick="loadNotificationMonitor(true)" class="ml-2 px-3 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-lg text-xs font-bold transition-all border border-rose-200 inline-flex items-center shadow-2xs">
+                                    <i class="fa-solid fa-rotate-right mr-1"></i> Try Again
+                                </button>
                             </td>
                         </tr>
                     `;
-                }).join('');
+                }
+            } catch (err) {
+                console.error('Failed to load notification monitor:', err);
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="px-6 py-8 text-center text-rose-600 font-semibold text-xs">
+                            <i class="fa-solid fa-triangle-exclamation mr-1.5 text-sm"></i>
+                            An unexpected error occurred while fetching delivery metrics.
+                            <button onclick="loadNotificationMonitor(true)" class="ml-2 px-3 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-lg text-xs font-bold transition-all border border-rose-200 inline-flex items-center shadow-2xs">
+                                <i class="fa-solid fa-rotate-right mr-1"></i> Try Again
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            } finally {
+                if (refreshIcon) {
+                    setTimeout(() => refreshIcon.classList.remove('fa-spin'), 400);
+                }
             }
         }
     </script>
 </body>
+
 </html>

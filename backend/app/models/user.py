@@ -1,9 +1,12 @@
 import enum
 from datetime import datetime, timezone
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 from sqlalchemy import Integer, String, Boolean, DateTime, Enum
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from app.database import Base
+
+if TYPE_CHECKING:
+    from app.models.doctor import Doctor
 
 
 class UserRole(str, enum.Enum):
@@ -26,8 +29,7 @@ class User(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc), nullable=False)
 
     # Relationships
-    doctor = relationship("Doctor", back_populates="user", uselist=False, cascade="all, delete-orphan")
+    doctor: Mapped[Optional["Doctor"]] = relationship("Doctor", back_populates="user", uselist=False, cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<User(id={self.id}, name='{self.name}', email='{self.email}', role='{self.role}')>"
-

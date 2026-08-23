@@ -1,3 +1,4 @@
+import logging
 from typing import Optional, Any
 from sqlalchemy.orm import Session, joinedload
 from fastapi import HTTPException, status
@@ -7,6 +8,8 @@ from app.models.doctor import Doctor
 from app.models.appointment import Appointment, AppointmentStatus
 from app.models.prescription import Prescription, Medication
 from app.schemas.prescription import MedicationItem
+
+logger = logging.getLogger(__name__)
 
 
 def _verify_doctor_access(appointment: Appointment, current_user: User, db: Session):
@@ -130,6 +133,13 @@ def submit_consultation(
     db.commit()
     db.refresh(prescription)
 
+    # Trigger Asynchronous Post-Visit Patient Care Email and Doctor Completion Confirmation
+    try:
+        from app.tasks import dispatch_async_task, send_appointment_completed_notifications_task
+        dispatch_async_task(send_appointment_completed_notifications_task, appointment.id)
+    except Exception as e:
+        logger.warning(f"[PrescriptionService] Non-blocking completion notification dispatch failed: {e}")
+
     return _serialize_prescription(prescription)
 
 
@@ -191,6 +201,13 @@ def create_prescription(
     appointment.status = AppointmentStatus.COMPLETED
     db.commit()
     db.refresh(prescription)
+
+    # Trigger Asynchronous Post-Visit Patient Care Email and Doctor Completion Confirmation
+    try:
+        from app.tasks import dispatch_async_task, send_appointment_completed_notifications_task
+        dispatch_async_task(send_appointment_completed_notifications_task, appointment.id)
+    except Exception as e:
+        logger.warning(f"[PrescriptionService] Non-blocking completion notification dispatch failed: {e}")
 
     return _serialize_prescription(prescription)
 

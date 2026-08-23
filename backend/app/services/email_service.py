@@ -36,7 +36,8 @@ class EmailService:
         subject: str,
         html_body: str,
         text_body: Optional[str] = None,
-        from_email: Optional[str] = None
+        from_email: Optional[str] = None,
+        attachments: Optional[list[dict[str, Any]]] = None
     ) -> dict[str, Any]:
         """
         Dispatch an email using the configured email provider.
@@ -45,32 +46,39 @@ class EmailService:
         sender = from_email or self.from_email
         plain_text = text_body or self._strip_html(html_body)
 
-        logger.info(f"[EmailService] Dispatching email to '{to_email}' via provider '{self.provider}' (Subject: {subject})")
+        att_count = len(attachments) if attachments else 0
+        logger.info(f"[EmailService] Dispatching email to '{to_email}' via provider '{self.provider}' (Subject: {subject}, Attachments: {att_count})")
 
         if self.provider == "sendgrid":
-            return self._send_via_sendgrid(to_email, subject, html_body, plain_text, sender)
+            return self._send_via_sendgrid(to_email, subject, html_body, plain_text, sender, attachments)
         elif self.provider == "mailgun":
-            return self._send_via_mailgun(to_email, subject, html_body, plain_text, sender)
+            return self._send_via_mailgun(to_email, subject, html_body, plain_text, sender, attachments)
         elif self.provider == "smtp":
-            return self._send_via_smtp(to_email, subject, html_body, plain_text, sender)
+            return self._send_via_smtp(to_email, subject, html_body, plain_text, sender, attachments)
         else:
             # Default to Mock / Console Provider
-            return self._send_via_mock(to_email, subject, html_body, plain_text, sender)
+            return self._send_via_mock(to_email, subject, html_body, plain_text, sender, attachments)
 
     # -------------------------------------------------------------------------
     # Provider Implementations
     # -------------------------------------------------------------------------
 
     def _send_via_sendgrid(
-        self, to_email: str, subject: str, html_body: str, plain_text: str, sender: str
+        self,
+        to_email: str,
+        subject: str,
+        html_body: str,
+        plain_text: str,
+        sender: str,
+        attachments: Optional[list[dict[str, Any]]] = None
     ) -> dict[str, Any]:
         """SendGrid v3 REST API implementation."""
         api_key = settings.SENDGRID_API_KEY
         if not api_key:
             logger.warning("[EmailService:SendGrid] Missing SENDGRID_API_KEY. Falling back to Mock delivery.")
-            return self._send_via_mock(to_email, subject, html_body, plain_text, sender)
+            return self._send_via_mock(to_email, subject, html_body, plain_text, sender, attachments)
 
-        payload = {
+        payload: dict[str, Any] = {
             "personalizations": [{"to": [{"email": to_email}]}],
             "from": {"email": sender, "name": self.from_name},
             "subject": subject,
@@ -79,6 +87,25 @@ class EmailService:
                 {"type": "text/html", "value": html_body}
             ]
         }
+
+        if attachments:
+            import base64
+            sg_attachments = []
+            for att in attachments:
+                raw = att.get("content", "")
+                if isinstance(raw, str):
+                    b64 = base64.b64encode(raw.encode("utf-8")).decode("utf-8")
+                elif isinstance(raw, bytes):
+                    b64 = base64.b64encode(raw).decode("utf-8")
+                else:
+                    b64 = ""
+                sg_attachments.append({
+                    "content": b64,
+                    "filename": att.get("filename", "attachment.ics"),
+                    "type": att.get("content_type", "text/calendar"),
+                    "disposition": "attachment"
+                })
+            payload["attachments"] = sg_attachments
 
         url = "https://api.sendgrid.com/v3/mail/send"
         headers = {
@@ -106,14 +133,20 @@ class EmailService:
             return {"success": False, "provider": "sendgrid", "message_id": "", "error": str(e)}
 
     def _send_via_mailgun(
-        self, to_email: str, subject: str, html_body: str, plain_text: str, sender: str
+        self,
+        to_email: str,
+        subject: str,
+        html_body: str,
+        plain_text: str,
+        sender: str,
+        attachments: Optional[list[dict[str, Any]]] = None
     ) -> dict[str, Any]:
         """Mailgun Messages REST API implementation."""
         api_key = settings.MAILGUN_API_KEY
         domain = settings.MAILGUN_DOMAIN
         if not api_key or not domain:
             logger.warning("[EmailService:Mailgun] Missing MAILGUN_API_KEY or MAILGUN_DOMAIN. Falling back to Mock.")
-            return self._send_via_mock(to_email, subject, html_body, plain_text, sender)
+            return self._send_via_mock(to_email, subject, html_body, plain_text, sender, attachments)
 
         url = f"https://api.mailgun.net/v3/{domain}/messages"
         import base64
@@ -149,19 +182,57 @@ class EmailService:
             return {"success": False, "provider": "mailgun", "message_id": "", "error": str(e)}
 
     def _send_via_smtp(
-        self, to_email: str, subject: str, html_body: str, plain_text: str, sender: str
+        self,
+        to_email: str,
+        subject: str,
+        html_body: str,
+        plain_text: str,
+        sender: str,
+        attachments: Optional[list[dict[str, Any]]] = None
     ) -> dict[str, Any]:
-        """Standard SMTP delivery implementation."""
+        """Standard SMTP delivery implementation with attachment support."""
         try:
-            msg = MIMEMultipart("alternative")
-            msg["Subject"] = subject
-            msg["From"] = f"{self.from_name} <{sender}>"
-            msg["To"] = to_email
+            if attachments:
+                from email.mime.base import MIMEBase
+                from email import encoders
+                msg = MIMEMultipart("mixed")
+                msg["Subject"] = subject
+                msg["From"] = f"{self.from_name} <{sender}>"
+                msg["To"] = to_email
 
-            part1 = MIMEText(plain_text, "plain", "utf-8")
-            part2 = MIMEText(html_body, "html", "utf-8")
-            msg.attach(part1)
-            msg.attach(part2)
+                body_part = MIMEMultipart("alternative")
+                body_part.attach(MIMEText(plain_text, "plain", "utf-8"))
+                body_part.attach(MIMEText(html_body, "html", "utf-8"))
+                msg.attach(body_part)
+
+                for att in attachments:
+                    raw_content = att.get("content", "")
+                    if isinstance(raw_content, str):
+                        payload_data = raw_content.encode("utf-8")
+                    else:
+                        payload_data = raw_content
+                    
+                    fname = att.get("filename", "invite.ics")
+                    mime_type = att.get("content_type", "text/calendar")
+                    main_type, _, sub_type = mime_type.partition("/")
+                    main_type = main_type or "text"
+                    sub_type = sub_type or "calendar"
+
+                    part = MIMEBase(main_type, sub_type, method="REQUEST", name=fname)
+                    part.set_payload(payload_data)
+                    encoders.encode_base64(part)
+                    part.add_header("Content-Disposition", f'attachment; filename="{fname}"')
+                    msg.attach(part)
+            else:
+                msg = MIMEMultipart("alternative")
+                msg["Subject"] = subject
+                msg["From"] = f"{self.from_name} <{sender}>"
+                msg["To"] = to_email
+
+                part1 = MIMEText(plain_text, "plain", "utf-8")
+                part2 = MIMEText(html_body, "html", "utf-8")
+                msg.attach(part1)
+                msg.attach(part2)
 
             server = smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT, timeout=10)
             if settings.SMTP_TLS:
@@ -180,10 +251,20 @@ class EmailService:
             return {"success": False, "provider": "smtp", "message_id": "", "error": str(e)}
 
     def _send_via_mock(
-        self, to_email: str, subject: str, html_body: str, plain_text: str, sender: str
+        self,
+        to_email: str,
+        subject: str,
+        html_body: str,
+        plain_text: str,
+        sender: str,
+        attachments: Optional[list[dict[str, Any]]] = None
     ) -> dict[str, Any]:
         """Mock / Local Console Delivery Provider."""
         msg_id = f"mock-msg-{int(time.time()*1000)}"
+        att_info = ""
+        if attachments:
+            att_names = [a.get("filename", "unknown") for a in attachments]
+            att_info = f"\nAttachments: {', '.join(att_names)} ({len(attachments)} file(s))"
         logger.info(
             f"\n"
             f"========================= [MOCK EMAIL DISPATCH] =========================\n"
@@ -191,7 +272,7 @@ class EmailService:
             f"To         : {to_email}\n"
             f"From       : {self.from_name} <{sender}>\n"
             f"Subject    : {subject}\n"
-            f"Message-ID : {msg_id}\n"
+            f"Message-ID : {msg_id}{att_info}\n"
             f"Preview    : {plain_text[:180]}...\n"
             f"========================================================================="
         )
@@ -263,6 +344,155 @@ def get_base_email_template(title: str, preheader: str, body_html: str, action_b
 </html>"""
 
 
+def generate_calendar_links(
+    title: str,
+    start_datetime_utc: datetime,
+    end_datetime_utc: datetime,
+    description: str = "",
+    location: str = "CareSync Medical Clinic"
+) -> dict[str, str]:
+    """Generates direct web calendar links for Google, Outlook, Office 365, Yahoo."""
+    import urllib.parse
+
+    g_start = start_datetime_utc.strftime("%Y%m%dT%H%M%SZ")
+    g_end = end_datetime_utc.strftime("%Y%m%dT%H%M%SZ")
+
+    iso_start = start_datetime_utc.strftime("%Y-%m-%dT%H:%M:%SZ")
+    iso_end = end_datetime_utc.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    google_params = urllib.parse.urlencode({
+        "action": "TEMPLATE",
+        "text": title,
+        "dates": f"{g_start}/{g_end}",
+        "details": description,
+        "location": location,
+    })
+    google_url = f"https://calendar.google.com/calendar/render?{google_params}"
+
+    outlook_params = urllib.parse.urlencode({
+        "path": "/calendar/action/compose",
+        "rru": "addevent",
+        "subject": title,
+        "startdt": iso_start,
+        "enddt": iso_end,
+        "body": description,
+        "location": location,
+    })
+    outlook_url = f"https://outlook.live.com/calendar/0/deeplink/compose?{outlook_params}"
+    office365_url = f"https://outlook.office.com/calendar/0/deeplink/compose?{outlook_params}"
+
+    yahoo_params = urllib.parse.urlencode({
+        "v": "60",
+        "title": title,
+        "st": g_start,
+        "et": g_end,
+        "desc": description,
+        "in_loc": location,
+    })
+    yahoo_url = f"https://calendar.yahoo.com/?{yahoo_params}"
+
+    return {
+        "google": google_url,
+        "outlook": outlook_url,
+        "office365": office365_url,
+        "yahoo": yahoo_url,
+    }
+
+
+def render_calendar_buttons_html(calendar_links: Optional[dict[str, str]]) -> str:
+    """Renders styled Add-to-Calendar buttons in email body."""
+    if not calendar_links:
+        return ""
+    g_link = calendar_links.get("google", "#")
+    out_link = calendar_links.get("outlook", "#")
+    o365_link = calendar_links.get("office365", "#")
+
+    return f"""
+    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 16px; margin: 18px 0; text-align: center;">
+      <p style="margin: 0 0 10px 0; font-size: 13px; font-weight: 700; color: #475569;">📅 Add this appointment to your calendar:</p>
+      <div style="display: inline-flex; flex-wrap: wrap; justify-content: center; gap: 8px;">
+        <a href="{g_link}" target="_blank" style="display: inline-block; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 14px; color: #1e293b; text-decoration: none; font-weight: 600; font-size: 12px; margin: 2px;">Google Calendar</a>
+        <a href="{out_link}" target="_blank" style="display: inline-block; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 14px; color: #1e293b; text-decoration: none; font-weight: 600; font-size: 12px; margin: 2px;">Outlook Web</a>
+        <a href="{o365_link}" target="_blank" style="display: inline-block; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 14px; color: #1e293b; text-decoration: none; font-weight: 600; font-size: 12px; margin: 2px;">Office 365</a>
+      </div>
+      <p style="margin: 8px 0 0 0; font-size: 11px; color: #94a3b8;">An <code>.ics</code> calendar invite has also been attached for Apple Calendar & other apps.</p>
+    </div>
+    """
+
+
+def render_doctor_previsit_summary_html(
+    previsit_summary: Optional[dict[str, Any]],
+    patient_info: Optional[dict[str, Any]] = None,
+    symptoms: Optional[str] = None
+) -> str:
+    """Renders structured patient pre-visit briefing for the attending doctor."""
+    chief_complaint = ""
+    reported_symptoms = symptoms or "General health checkup and consultation"
+    past_history = []
+    ai_urgency = ""
+    ai_summary_text = ""
+
+    if previsit_summary:
+        chief_complaint = previsit_summary.get("chief_complaint") or ""
+        if previsit_summary.get("symptoms"):
+            reported_symptoms = previsit_summary.get("symptoms")
+        past_history = previsit_summary.get("medical_history") or []
+        ai_urgency = previsit_summary.get("urgency_level") or ""
+        ai_summary_text = previsit_summary.get("summary_text") or ""
+
+    patient_contact_html = ""
+    if patient_info:
+        p_phone = patient_info.get("phone") or "Not provided"
+        p_email = patient_info.get("email") or "Not provided"
+        patient_contact_html = f"""
+        <div style="font-size: 12px; color: #64748b; margin-top: 4px;">
+          Contact: <strong>{p_email}</strong> &bull; Phone: <strong>{p_phone}</strong>
+        </div>
+        """
+
+    urgency_badge = ""
+    if ai_urgency:
+        badge_color = "#ef4444" if ai_urgency.upper() == "HIGH" else ("#f59e0b" if ai_urgency.upper() == "MEDIUM" else "#10b981")
+        urgency_badge = f'<span style="background:{badge_color}; color:#ffffff; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:700; margin-left:8px;">{ai_urgency.upper()} URGENCY</span>'
+
+    history_html = ""
+    if past_history:
+        items = "".join([f"<li>{h}</li>" for h in past_history[:5]])
+        history_html = f"""
+        <div style="margin-top: 10px;">
+          <strong style="font-size: 12px; color: #475569;">Past Medical History / Recent Consultations:</strong>
+          <ul style="margin: 4px 0 0 0; padding-left: 20px; font-size: 12px; color: #334155;">{items}</ul>
+        </div>
+        """
+
+    ai_box_html = ""
+    if ai_summary_text:
+        ai_box_html = f"""
+        <div style="background: #eef2ff; border: 1px solid #c7d2fe; border-radius: 6px; padding: 10px 12px; margin-top: 10px;">
+          <strong style="font-size: 12px; color: #4338ca;">AI Clinical Pre-Screening:</strong>
+          <p style="margin: 4px 0 0 0; font-size: 12px; color: #3730a3; line-height: 1.4;">{ai_summary_text}</p>
+        </div>
+        """
+
+    return f"""
+    <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-left: 4px solid #4f46e5; border-radius: 8px; padding: 16px; margin: 20px 0;">
+      <h3 style="margin: 0 0 6px 0; font-size: 14px; font-weight: 800; color: #1e293b;">
+        📋 Patient Pre-Visit Clinical Briefing {urgency_badge}
+      </h3>
+      {patient_contact_html}
+      <div style="margin-top: 10px;">
+        <strong style="font-size: 12px; color: #475569;">Reason for Visit & Symptoms:</strong>
+        <p style="margin: 4px 0 0 0; font-size: 13px; color: #0f172a; font-weight: 600;">{chief_complaint or reported_symptoms}</p>
+      </div>
+      {history_html}
+      {ai_box_html}
+      <div style="margin-top: 12px; font-size: 11px; color: #94a3b8;">
+        Confidential clinical data generated for authorized attending physician only.
+      </div>
+    </div>
+    """
+
+
 def render_booking_confirmation_email(
     patient_name: str,
     doctor_name: str,
@@ -270,26 +500,45 @@ def render_booking_confirmation_email(
     appointment_date: str,
     start_time: str,
     appointment_id: int,
-    is_doctor_copy: bool = False
+    is_doctor_copy: bool = False,
+    end_time: Optional[str] = None,
+    appointment_type: str = "In-Person Consultation",
+    calendar_links: Optional[dict[str, str]] = None,
+    previsit_summary: Optional[dict[str, Any]] = None,
+    patient_info: Optional[dict[str, Any]] = None,
+    symptoms: Optional[str] = None
 ) -> tuple[str, str, str]:
-    """Generates (subject, html, text) for appointment booking confirmation."""
+    """Generates (subject, html, text) for appointment booking confirmation with calendar options & doctor pre-visit summary."""
+    time_display = f"{start_time} - {end_time}" if end_time else start_time
+    cal_html = render_calendar_buttons_html(calendar_links)
+
     if is_doctor_copy:
         subject = f"New Appointment Confirmed: {patient_name} ({appointment_date} at {start_time})"
         title = "New Consultation Scheduled"
         preheader = f"Patient {patient_name} has booked a consultation for {appointment_date}."
+        previsit_html = render_doctor_previsit_summary_html(previsit_summary, patient_info, symptoms)
+
         body = f"""
         <p>Hello <strong>{doctor_name}</strong>,</p>
         <p>A new consultation has been confirmed and scheduled on your clinical calendar.</p>
         <div class="card">
           <div class="card-row"><span class="card-label">Patient Name:</span><span class="card-val">{patient_name}</span></div>
           <div class="card-row"><span class="card-label">Appointment ID:</span><span class="card-val">#{appointment_id}</span></div>
-          <div class="card-row"><span class="card-label">Date:</span><span class="card-val">{appointment_date}</span></div>
-          <div class="card-row"><span class="card-label">Time:</span><span class="card-val">{start_time}</span></div>
-          <div class="card-row"><span class="card-label">Specialization:</span><span class="card-val">{specialization}</span></div>
+          <div class="card-row"><span class="card-label">Consultation Date:</span><span class="card-val">{appointment_date}</span></div>
+          <div class="card-row"><span class="card-label">Time Window:</span><span class="card-val">{time_display}</span></div>
+          <div class="card-row"><span class="card-label">Department:</span><span class="card-val">{specialization}</span></div>
+          <div class="card-row"><span class="card-label">Appointment Type:</span><span class="card-val">{appointment_type}</span></div>
         </div>
-        <p>You can review the patient's pre-visit symptom analysis in your doctor portal.</p>
+        {previsit_html}
+        {cal_html}
+        <p>You can review full clinical records in the Doctor Clinical Workspace.</p>
         """
-        text = f"Hello {doctor_name},\nA new appointment with {patient_name} has been confirmed on {appointment_date} at {start_time} (ID: #{appointment_id})."
+        text = (
+            f"Hello {doctor_name},\n"
+            f"A new appointment with {patient_name} has been confirmed on {appointment_date} at {time_display} (ID: #{appointment_id}, Type: {appointment_type}).\n"
+            f"Symptoms/Reason: {symptoms or 'General consultation'}\n"
+            "An .ics calendar invitation has been attached."
+        )
     else:
         subject = f"Appointment Confirmed: Dr. {doctor_name} on {appointment_date} at {start_time}"
         title = "Consultation Confirmed"
@@ -299,15 +548,166 @@ def render_booking_confirmation_email(
         <p>Your healthcare appointment has been successfully scheduled and confirmed.</p>
         <div class="card">
           <div class="card-row"><span class="card-label">Attending Physician:</span><span class="card-val">Dr. {doctor_name}</span></div>
-          <div class="card-row"><span class="card-label">Department:</span><span class="card-val">{specialization}</span></div>
+          <div class="card-row"><span class="card-label">Department / Specialty:</span><span class="card-val">{specialization}</span></div>
           <div class="card-row"><span class="card-label">Appointment ID:</span><span class="card-val">#{appointment_id}</span></div>
           <div class="card-row"><span class="card-label">Date:</span><span class="card-val">{appointment_date}</span></div>
-          <div class="card-row"><span class="card-label">Time:</span><span class="card-val">{start_time}</span></div>
+          <div class="card-row"><span class="card-label">Time:</span><span class="card-val">{time_display}</span></div>
+          <div class="card-row"><span class="card-label">Appointment Type:</span><span class="card-val">{appointment_type}</span></div>
         </div>
-        <p>Please arrive 10 minutes prior to your scheduled consultation time.</p>
+        {cal_html}
+        <p>Please arrive 10 minutes prior to your scheduled consultation time. If you have previous medical records or lab reports, please bring them along.</p>
         """
-        text = f"Hello {patient_name},\nYour appointment with Dr. {doctor_name} ({specialization}) is confirmed for {appointment_date} at {start_time} (ID: #{appointment_id})."
+        text = (
+            f"Hello {patient_name},\n"
+            f"Your appointment with Dr. {doctor_name} ({specialization}) is confirmed for {appointment_date} at {time_display} (ID: #{appointment_id}, Type: {appointment_type}).\n"
+            "An .ics calendar invitation has been attached."
+        )
 
+    html = get_base_email_template(title, preheader, body)
+    return subject, html, text
+
+
+def render_post_visit_patient_email(
+    patient_name: str,
+    doctor_name: str,
+    specialization: str,
+    appointment_date: str,
+    appointment_id: int,
+    visit_summary: Optional[str] = None,
+    follow_up_instructions: Optional[str] = None,
+    medications: Optional[list[dict[str, Any]]] = None,
+) -> tuple[str, str, str]:
+    """Generates (subject, html, text) for patient post-visit summary & instructions email."""
+    subject = f"Your Consultation Summary & Care Instructions: Dr. {doctor_name} (#{appointment_id})"
+    title = "Post-Consultation Care Guide"
+    preheader = f"Your consultation summary, care instructions, and prescriptions from Dr. {doctor_name}."
+
+    notes_html = ""
+    if visit_summary:
+        notes_html = f"""
+        <div style="margin-bottom: 16px;">
+          <h4 style="margin: 0 0 6px 0; font-size: 13px; font-weight: 700; color: #334155;">🩺 Clinical Summary & Findings:</h4>
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px; font-size: 13px; color: #1e293b; line-height: 1.5;">
+            {visit_summary.replace(chr(10), '<br>')}
+          </div>
+        </div>
+        """
+
+    instructions_html = ""
+    if follow_up_instructions:
+        instructions_html = f"""
+        <div style="margin-bottom: 16px;">
+          <h4 style="margin: 0 0 6px 0; font-size: 13px; font-weight: 700; color: #0284c7;">📝 Post-Visit Care & Instructions:</h4>
+          <div style="background: #f0f9ff; border: 1px solid #bae6fd; border-left: 4px solid #0284c7; border-radius: 8px; padding: 14px; font-size: 13px; color: #0369a1; line-height: 1.5;">
+            {follow_up_instructions.replace(chr(10), '<br>')}
+          </div>
+        </div>
+        """
+
+    meds_html = ""
+    meds_text_list = []
+    if medications and len(medications) > 0:
+        med_rows = []
+        for m in medications:
+            name = m.get("medication_name", "Medication")
+            dosage = m.get("dosage", "")
+            freq = m.get("frequency", "")
+            dur = m.get("duration", "")
+            inst = m.get("instructions") or "Take as prescribed"
+            med_rows.append(f"""
+            <tr style="border-bottom: 1px solid #e2e8f0;">
+              <td style="padding: 10px 8px; font-weight: 700; color: #0f172a; font-size: 13px;">{name}</td>
+              <td style="padding: 10px 8px; color: #334155; font-size: 12px;">{dosage}</td>
+              <td style="padding: 10px 8px; color: #334155; font-size: 12px;">{freq}</td>
+              <td style="padding: 10px 8px; color: #334155; font-size: 12px;">{dur}</td>
+              <td style="padding: 10px 8px; color: #64748b; font-size: 11px;">{inst}</td>
+            </tr>
+            """)
+            meds_text_list.append(f"- {name} ({dosage}): {freq} for {dur}. Notes: {inst}")
+
+        meds_html = f"""
+        <div style="margin-bottom: 20px;">
+          <h4 style="margin: 0 0 8px 0; font-size: 13px; font-weight: 700; color: #059669;">💊 Prescribed Medications:</h4>
+          <table style="width: 100%; border-collapse: collapse; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
+            <thead>
+              <tr style="background: #f0fdf4; border-bottom: 1px solid #bbf7d0; text-align: left; font-size: 11px; font-weight: 700; color: #166534;">
+                <th style="padding: 8px;">Medicine</th>
+                <th style="padding: 8px;">Dosage</th>
+                <th style="padding: 8px;">Frequency</th>
+                <th style="padding: 8px;">Duration</th>
+                <th style="padding: 8px;">Instructions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {''.join(med_rows)}
+            </tbody>
+          </table>
+        </div>
+        """
+
+    body = f"""
+    <p>Hello <strong>{patient_name}</strong>,</p>
+    <p>Thank you for consulting with <strong>Dr. {doctor_name}</strong> ({specialization}) on <strong>{appointment_date}</strong>. Below is your consultation summary and follow-up guidance:</p>
+    <div class="card">
+      <div class="card-row"><span class="card-label">Appointment ID:</span><span class="card-val">#{appointment_id}</span></div>
+      <div class="card-row"><span class="card-label">Attending Physician:</span><span class="card-val">Dr. {doctor_name}</span></div>
+      <div class="card-row"><span class="card-label">Department:</span><span class="card-val">{specialization}</span></div>
+      <div class="card-row"><span class="card-label">Consultation Date:</span><span class="card-val">{appointment_date}</span></div>
+    </div>
+    {notes_html}
+    {instructions_html}
+    {meds_html}
+    <p style="font-size: 12px; color: #64748b;">You can also access your complete health records, view active prescriptions, and enable automated dosage reminders in the CareSync Patient Portal.</p>
+    """
+
+    text_parts = [
+        f"Hello {patient_name},",
+        f"Here is your post-visit summary from Dr. {doctor_name} ({specialization}) on {appointment_date} (ID: #{appointment_id}):",
+    ]
+    if visit_summary:
+        text_parts.append(f"\nClinical Notes:\n{visit_summary}")
+    if follow_up_instructions:
+        text_parts.append(f"\nFollow-up Instructions:\n{follow_up_instructions}")
+    if meds_text_list:
+        text_parts.append("\nPrescriptions:\n" + "\n".join(meds_text_list))
+
+    text = "\n".join(text_parts)
+    html = get_base_email_template(title, preheader, body)
+    return subject, html, text
+
+
+def render_appointment_completed_doctor_email(
+    doctor_name: str,
+    patient_name: str,
+    specialization: str,
+    appointment_date: str,
+    appointment_id: int,
+    notes: Optional[str] = None,
+    follow_up_instructions: Optional[str] = None,
+    medications_count: int = 0
+) -> tuple[str, str, str]:
+    """Generates (subject, html, text) for doctor appointment completion confirmation."""
+    subject = f"Consultation Completed & Recorded: {patient_name} (#{appointment_id})"
+    title = "Consultation Completed"
+    preheader = f"Appointment #{appointment_id} with {patient_name} has been successfully completed and recorded."
+
+    body = f"""
+    <p>Hello <strong>{doctor_name}</strong>,</p>
+    <p>This is to confirm that the consultation for <strong>{patient_name}</strong> has been marked <strong>COMPLETED</strong> and recorded in the CareSync clinical registry.</p>
+    <div class="card" style="border-left: 4px solid #10b981;">
+      <div class="card-row"><span class="card-label">Appointment ID:</span><span class="card-val">#{appointment_id}</span></div>
+      <div class="card-row"><span class="card-label">Patient Name:</span><span class="card-val">{patient_name}</span></div>
+      <div class="card-row"><span class="card-label">Consultation Date:</span><span class="card-val">{appointment_date}</span></div>
+      <div class="card-row"><span class="card-label">Medications Prescribed:</span><span class="card-val">{medications_count} item(s)</span></div>
+      <div class="card-row"><span class="card-label">Status:</span><span class="card-val" style="color: #059669; font-weight: 700;">COMPLETED</span></div>
+    </div>
+    <p>The patient has been automatically emailed their visit summary and post-consultation care instructions.</p>
+    """
+    text = (
+        f"Hello {doctor_name},\n"
+        f"Consultation #{appointment_id} with {patient_name} on {appointment_date} has been marked COMPLETED. "
+        f"Records and prescriptions ({medications_count} items) have been safely saved."
+    )
     html = get_base_email_template(title, preheader, body)
     return subject, html, text
 

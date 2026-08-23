@@ -20,6 +20,8 @@ from app.tasks.email_tasks import (
     send_leave_cancellation_email_task,
     send_appointment_reschedule_email_task,
     send_consultation_summary_email_task,
+    send_appointment_completed_notifications_task,
+    send_consultation_completed_notifications_task,
 )
 from app.tasks.reminder_tasks import (
     send_appointment_reminder_task,
@@ -103,6 +105,8 @@ __all__ = [
     "send_leave_cancellation_email_task",
     "send_appointment_reschedule_email_task",
     "send_consultation_summary_email_task",
+    "send_appointment_completed_notifications_task",
+    "send_consultation_completed_notifications_task",
     "send_appointment_reminder_task",
     "batch_send_appointment_reminders_task",
     "send_medication_reminder_task",

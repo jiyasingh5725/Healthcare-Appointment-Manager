@@ -206,6 +206,7 @@ def get_admin_metrics(
 
     total_users = db.query(User).count()
     total_patients = db.query(User).filter(User.role == UserRole.PATIENT).count()
+    total_staff = db.query(User).filter(User.role.in_([UserRole.DOCTOR, UserRole.ADMIN])).count()
     total_doctors = db.query(Doctor).count()
     active_doctors = db.query(Doctor).filter(Doctor.is_active == True).count()
     inactive_doctors = total_doctors - active_doctors
@@ -214,18 +215,17 @@ def get_admin_metrics(
     confirmed_appointments = db.query(Appointment).filter(Appointment.status == AppointmentStatus.CONFIRMED).count()
     completed_appointments = db.query(Appointment).filter(Appointment.status == AppointmentStatus.COMPLETED).count()
     cancelled_appointments = db.query(Appointment).filter(Appointment.status == AppointmentStatus.CANCELLED).count()
-    in_progress_appointments = db.query(Appointment).filter(Appointment.status == AppointmentStatus.IN_PROGRESS).count()
+    rescheduled_appointments = db.query(Appointment).filter(Appointment.status == AppointmentStatus.RESCHEDULED).count()
 
     total_leaves = db.query(DoctorLeave).count()
-    leave_conflicts_cancelled = db.query(Appointment).filter(
-        Appointment.status == AppointmentStatus.CANCELLED,
-        Appointment.cancellation_reason.like("%leave%")
+    leave_conflicts_resolved = db.query(Appointment).filter(
+        Appointment.cancellation_reason.ilike("%leave%")
     ).count()
 
-    notif_sent = db.query(Notification).filter(Notification.status == NotificationStatus.SENT).count()
-    notif_failed = db.query(Notification).filter(Notification.status == NotificationStatus.FAILED).count()
-    notif_pending = db.query(Notification).filter(Notification.status.in_([NotificationStatus.PENDING, NotificationStatus.RETRYING])).count()
-    total_notifs = notif_sent + notif_failed + notif_pending
+    notif_sent = db.query(Notification).filter(Notification.status == NotificationStatus.SENT.value).count()
+    notif_failed = db.query(Notification).filter(Notification.status == NotificationStatus.FAILED.value).count()
+    notif_pending = db.query(Notification).filter(Notification.status.in_([NotificationStatus.PENDING.value, NotificationStatus.RETRYING.value])).count()
+    total_notifs = db.query(Notification).count()
     notif_success_rate = round((notif_sent / total_notifs * 100), 1) if total_notifs > 0 else 100.0
 
     return {
@@ -233,6 +233,7 @@ def get_admin_metrics(
         "users": {
             "total": total_users,
             "patients": total_patients,
+            "staff": total_staff,
             "doctors": total_doctors,
             "active_doctors": active_doctors,
             "inactive_doctors": inactive_doctors
@@ -242,11 +243,11 @@ def get_admin_metrics(
             "confirmed": confirmed_appointments,
             "completed": completed_appointments,
             "cancelled": cancelled_appointments,
-            "in_progress": in_progress_appointments
+            "rescheduled": rescheduled_appointments
         },
         "leaves": {
             "total_leaves": total_leaves,
-            "leave_conflicts_resolved": leave_conflicts_cancelled
+            "leave_conflicts_resolved": leave_conflicts_resolved
         },
         "notifications": {
             "total": total_notifs,
