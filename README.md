@@ -11,13 +11,74 @@
 
 ---
 
-## 📸 Platform Screenshots
+## 📸 Platform UI Showcase
 
-### 1. Modern Patient Landing Page & Smart Slot Discovery
-![CareSync Landing Page](docs/screenshots/landing_ui.jpg)
+### 🌐 1. Landing Page & Portal Gateway
+| CareSync Hero Landing Page | Role-Based Portal Gateway |
+| :---: | :---: |
+| ![CareSync Landing Page](docs/screenshots/sc2.png) | ![Portal Selection](docs/screenshots/sc1.png) |
 
-### 2. Clinical Workspace, Patient Schedule & AI Diagnosis Summary
-![CareSync Doctor & Patient Portal](docs/screenshots/portal_ui.jpg)
+---
+
+### 👤 2. Patient Experience & Smart Consultation Flow
+
+#### A. Patient Dashboard & Real-Time Notification System
+| Patient Overview & Upcoming Visits | Real-Time Clinical Notifications |
+| :---: | :---: |
+| ![Patient Dashboard](docs/screenshots/p1.png) | ![Notifications Dropdown](docs/screenshots/p19.png) |
+
+| Health Metrics & Recent Records | Google Calendar Sync & Medication Alerts |
+| :---: | :---: |
+| ![Patient Stats](docs/screenshots/p2.png) | ![Calendar & Medications](docs/screenshots/p3.png) |
+
+#### B. Specialist Search & Dynamic Slot Selection
+| Find Specialists by Department | Interactive Time Slot Picker Modal |
+| :---: | :---: |
+| ![Find Specialists](docs/screenshots/p6.png) | ![Slot Selection](docs/screenshots/p10.png) |
+
+| Filter by Medical Specialization | Time Slot Selection with Hold System |
+| :---: | :---: |
+| ![Specialization Filter](docs/screenshots/p9.png) | ![Slot Selected](docs/screenshots/p11.png) |
+
+#### C. Intelligent Booking & Clinical Intake
+| Select Physician & Booking Date | Symptom Intake & Summary Confirmation |
+| :---: | :---: |
+| ![Booking Form](docs/screenshots/p12.png) | ![Symptom Intake](docs/screenshots/p13.png) |
+
+#### D. Consultation History, Diagnosis & AI-Generated Recovery Plan
+| Scheduled Consultations Record Table | Completed Consultation Details |
+| :---: | :---: |
+| ![My Appointments](docs/screenshots/p14.png) | ![Consultation Record](docs/screenshots/p15.png) |
+
+| Physician Diagnosis & Prescriptions | AI-Generated Patient Recovery Plan |
+| :---: | :---: |
+| ![Diagnosis & Prescription](docs/screenshots/p16.png) | ![AI Care Summary](docs/screenshots/p17.png) |
+
+| Patient Profile & Account Security |
+| :---: |
+| ![Patient Profile](docs/screenshots/p20.png) |
+
+---
+
+### 🩺 3. Attending Doctor Clinical Workspace
+| Doctor Agenda & Daily Patient Queue | AI Clinical Pre-Visit Summary & Decision Support |
+| :---: | :---: |
+| ![Doctor Dashboard](docs/screenshots/doc_dashboard.png) | ![AI Decision Support](docs/screenshots/doc_ai_summary.png) |
+
+---
+
+### 🛡️ 4. Central Hospital Administration Panel
+| Hospital Metrics & Operations Overview | Medical Staff Directory & Account Control |
+| :---: | :---: |
+| ![Admin Dashboard](docs/screenshots/admin_dashboard.png) | ![Staff Directory](docs/screenshots/admin_staff.png) |
+
+| Weekly Consultation Shift Schedule | Doctor Leave & Automated Conflict Management |
+| :---: | :---: |
+| ![Weekly Working Hours](docs/screenshots/admin_schedule.png) | ![Doctor Leaves](docs/screenshots/admin_leaves.png) |
+
+| Real-Time SMTP Email & Notification Monitor |
+| :---: |
+| ![SMTP Notification Logs](docs/screenshots/admin_notifications.png) |
 
 ---
 
