@@ -1,21 +1,50 @@
 # CareSync: Healthcare Appointment & Clinical Management Platform
 
-CareSync is a secure, resilient healthcare appointment and follow-up management platform engineered with FastAPI, SQLAlchemy, Redis, Celery, Google Gemini AI, and Google Calendar integration. It features dedicated portals for patients, attending physicians, and hospital administrators.
+[![Live Demo](https://img.shields.io/badge/Live_Demo-Render-46E3B7?style=for-the-badge&logo=render&logoColor=white)](https://caresync-healthcare.onrender.com)
+[![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com)
+[![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org)
+[![Google Gemini AI](https://img.shields.io/badge/Google_Gemini_AI-8E75B2?style=for-the-badge&logo=google-gemini&logoColor=white)](https://aistudio.google.com)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
+
+> **Live Production Website**: 🌐 **[https://caresync-healthcare.onrender.com](https://caresync-healthcare.onrender.com)**  
+> **Interactive Swagger API Documentation**: 📖 **[https://caresync-healthcare.onrender.com/docs](https://caresync-healthcare.onrender.com/docs)**
+
+---
+
+## 📸 Platform Screenshots
+
+### 1. Modern Patient Landing Page & Smart Slot Discovery
+![CareSync Landing Page](docs/screenshots/landing_ui.jpg)
+
+### 2. Clinical Workspace, Patient Schedule & AI Diagnosis Summary
+![CareSync Doctor & Patient Portal](docs/screenshots/portal_ui.jpg)
+
+---
+
+## 🔑 Quick 1-Click Demo Accounts
+
+The platform comes pre-seeded with instant demo credentials for immediate evaluation:
+
+| Role | Email | Password | Key Capabilities |
+| :--- | :--- | :--- | :--- |
+| **🛡️ Hospital Admin** | `admin@hospital.org` | `AdminPass123!` | Onboard physicians, configure shift schedules, manage doctor leaves, and view system metrics. |
+| **🩺 Attending Doctor** | `doctor@hospital.org` | `DoctorPass123!` | Review consultation queues, view AI clinical triage summaries, and prescribe medication courses. |
+| **👤 Demo Patient** | `patient@example.com` | `Password123!` | Real-time smart slot booking, atomic 10-min slot holds, Google Calendar sync, and email alerts. |
 
 ---
 
 ## 🌟 Key Features
 
 ### 👤 Patient Portal
-- **Smart Appointment Booking**: Dynamic slot discovery based on weekly working hours, doctor leaves, and existing bookings.
-- **Atomic Slot Holds**: 10-minute temporary slot reservation to prevent race conditions during booking.
-- **Rescheduling & Cancellations**: Atomic appointment updates, freed slot releases, and automatic history preservation.
-- **Medication Reminders**: Track active prescribed medications with automated background reminder notifications.
+- **Smart Appointment Booking**: Dynamic slot discovery calculated from weekly shift hours, doctor leaves, and existing bookings.
+- **Atomic Slot Holds**: 10-minute temporary slot reservation to eliminate race conditions and double-booking.
+- **Rescheduling & Cancellations**: Immediate slot release, audit trail logging, and calendar sync updates.
+- **Medication Reminders**: Track prescribed medications with dosage, frequency, and background reminder alerts.
 - **Google Calendar Sync**: Real-time two-way synchronization of confirmed appointments to Google Calendar via OAuth 2.0.
 
 ### 🩺 Doctor Clinical Workspace
 - **Daily Agenda & Schedule**: Filter today's consultations, upcoming queues, and completed patient cases.
-- **AI Clinical Summaries**: Instant structured pre-consultation symptom summaries powered by Google Gemini AI with heuristic fallbacks.
+- **AI Clinical Summaries**: Instant structured pre-consultation symptom summaries powered by **Google Gemini AI** with heuristic fallbacks.
 - **Consultations & Prescriptions**: Record diagnoses, clinical notes, and structured medication courses (dosage, frequency, instructions).
 
 ### 🛡️ Admin Operations Panel
@@ -31,9 +60,9 @@ CareSync is a secure, resilient healthcare appointment and follow-up management 
 CareSync/
 ├── backend/
 │   ├── app/
-│   │   ├── main.py              # FastAPI application entry point
+│   │   ├── main.py              # FastAPI application entry point & static mounting
 │   │   ├── config.py            # Environment configurations
-│   │   ├── database.py          # SQLAlchemy engine & session lifecycle
+│   │   ├── database.py          # SQLAlchemy engine, session lifecycle & auto-seeding
 │   │   ├── models/              # Relational database models
 │   │   ├── schemas/             # Pydantic request/response schemas
 │   │   ├── routes/              # Modular REST API endpoints
@@ -45,7 +74,7 @@ CareSync/
 │   └── .env.example             # Environment template
 ├── frontend/
 │   ├── index.html               # Landing page
-│   ├── login.html               # Authentication & session gate
+│   ├── login.html               # Authentication & 1-click role switcher
 │   ├── register.html            # Patient registration
 │   ├── patient/                 # Patient portal (Dashboard, Booking, Profile)
 │   ├── doctor/                  # Doctor portal (Agenda, Case Review, Notes)
@@ -53,6 +82,7 @@ CareSync/
 │   ├── css/styles.css           # Design system, glassmorphism, & skeletons
 │   └── js/                      # API client, Auth state, & UI helpers
 ├── docs/                        # Complete technical documentation
+│   ├── screenshots/             # High-resolution platform UI preview images
 │   ├── system-design.md         # Architecture, ACID transactions & concurrency
 │   ├── api-documentation.md     # OpenAPI REST endpoints & schemas
 │   ├── database-schema.md       # Relational tables, keys, & indexes
@@ -63,75 +93,42 @@ CareSync/
 
 ---
 
-## 🚀 Quick Start Guide
+## 🚀 Local Development Setup
 
 ### 1. Prerequisites
 - **Python**: 3.10+
-- **Redis Server**: 6.0+ (Local executable, Memurai for Windows, or Docker)
+- **Redis Server** *(Optional for Celery workers)*: 6.0+
 
-### 2. Backend Installation & Setup
+### 2. Backend Installation & Startup
 ```bash
-# Clone repository
-git clone https://github.com/your-org/healthcare-appointment-manager.git
+# 1. Clone repository
+git clone https://github.com/jiyasingh5725/Healthcare-Appointment-Manager.git
 cd Healthcare-Appointment-Manager
 
-# Create and activate virtual environment
+# 2. Create and activate virtual environment
 python -m venv venv
 # Windows:
 venv\Scripts\activate
 # Linux/macOS:
 source venv/bin/activate
 
-# Install dependencies
+# 3. Install dependencies
 pip install -r backend/requirements.txt
 
-# Configure environment
+# 4. Configure environment
 cp backend/.env.example backend/.env
-```
 
-### 3. Start the FastAPI Server
-```bash
+# 5. Start unified FastAPI & Frontend Server
 python -m uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000 --reload
 ```
-- **API Health Check**: `http://127.0.0.1:8000/api/health`
+
+- **Website**: `http://127.0.0.1:8000`
 - **Interactive Swagger Docs**: `http://127.0.0.1:8000/docs`
-
-### 4. Start Redis & Celery Background Workers
-In separate terminal tabs:
-
-**A. Start Redis:**
-```bash
-# Docker:
-docker run -d -p 6379:6379 --name redis-healthcare redis:alpine
-# Or Windows Redis:
-redis-server.exe
-```
-
-**B. Start Celery Worker (Windows compatible):**
-```bash
-cd backend
-celery -A app.tasks.celery_app worker -l info -P solo
-```
-
-**C. Start Celery Beat Scheduler (for periodic reminder checks & expired hold cleanup):**
-```bash
-cd backend
-celery -A app.tasks.celery_app beat -l info
-```
-
-### 5. Launch the Frontend
-Open `frontend/index.html` directly in your browser, or serve using any static web server:
-```bash
-# Using Python HTTP server
-python -m http.server 3000 --directory frontend
-```
-Navigate to `http://127.0.0.1:3000`.
+- **Health Check**: `http://127.0.0.1:8000/api/health`
 
 ---
 
 ## 🧪 Running Automated Test Suites
-
-CareSync includes comprehensive automated test suites covering all core workflows:
 
 ```bash
 # Phase 16: Email & Multichannel Notification Delivery
@@ -151,11 +148,12 @@ python tests/test_phase19_appointment_synchronization.py
 
 ## 📚 Technical Documentation
 
-- [System Design Document](file:///docs/system-design.md): Deep-dive into double-booking prevention, locking, ACID transactions, doctor leave resolution, and failure resilience.
-- [REST API Specification](file:///docs/api-documentation.md): Comprehensive endpoint specifications with parameters, request payloads, and response models.
-- [Database Schema](file:///docs/database-schema.md): Complete data dictionary covering all tables, foreign keys, and indexes.
-- [LLM Prompts & AI Clinical Integration](file:///docs/llm-prompts.md): Gemini AI prompt templates, JSON schema validation, and fallback heuristics.
-- [Google Calendar Setup Guide](file:///docs/google-calendar-setup.md): Step-by-step setup for Google Cloud Console OAuth 2.0 credentials and background sync.
+- [System Design Document](docs/system-design.md): Concurrency control, double-booking prevention, locking, ACID transactions, and doctor leave resolution.
+- [REST API Specification](docs/api-documentation.md): Comprehensive endpoint specifications with parameters, request payloads, and response models.
+- [Database Schema](docs/database-schema.md): Complete data dictionary covering all relational tables, foreign keys, and indexes.
+- [LLM Prompts & AI Clinical Integration](docs/llm-prompts.md): Gemini AI prompt templates, JSON schema validation, and fallback heuristics.
+- [Google Calendar Setup Guide](docs/google-calendar-setup.md): Step-by-step setup for Google Cloud Console OAuth 2.0 credentials and background sync.
+- [Production Deployment Guide](docs/deployment.md): Detailed deployment instructions for cloud servers and containerized setups.
 
 ---
 
