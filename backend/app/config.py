@@ -31,7 +31,7 @@ class Settings:
     # Database Configuration
     DATABASE_URL: str = os.getenv(
         "DATABASE_URL",
-        "mysql+pymysql://root:@127.0.0.1:3306/healthcare_manager"
+        f"sqlite:///{(BASE_DIR / 'healthcare_manager.db').as_posix()}"
     )
 
     # JWT Settings (Placeholder for future phases)
@@ -42,7 +42,7 @@ class Settings:
     # AI / LLM Configuration
     GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
     OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
-    LLM_MODEL_NAME: str = os.getenv("LLM_MODEL_NAME", "gemini-1.5-flash")
+    LLM_MODEL_NAME: str = os.getenv("LLM_MODEL_NAME", "gemini-flash-latest")
     LLM_PROVIDER: str = os.getenv("LLM_PROVIDER", "gemini")
 
     # Redis & Celery Background Tasks Configuration (Phase 15)

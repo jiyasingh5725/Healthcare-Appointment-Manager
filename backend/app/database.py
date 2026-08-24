@@ -52,7 +52,7 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
 def init_db():
-    """Ensure all model tables are created and migrate any missing columns."""
+    """Ensure all model tables are created, migrate columns, and seed initial demo accounts."""
     import app.models  # noqa: F401
     Base.metadata.create_all(bind=engine)
 
@@ -80,9 +80,92 @@ def init_db():
     except Exception as e:
         logger.warning(f"[DB:Migration] Minor schema sync notice: {e}")
 
+    # Seed default Admin, Doctor, and Demo Patient accounts
+    try:
+        from datetime import time as dt_time
+        from app.utils.security import hash_password
+        from app.models.user import User, UserRole
+        from app.models.doctor import Doctor
+        from app.models.doctor_schedule import DoctorWorkingHours
 
-# Auto-initialize tables
-init_db()
+        seed_db = SessionLocal()
+        try:
+            # 1. Seed Admin
+            admin_user = seed_db.query(User).filter(User.email == "admin@hospital.org").first()
+            if not admin_user:
+                admin_user = User(
+                    name="System Administrator",
+                    email="admin@hospital.org",
+                    password_hash=hash_password("AdminPass123!"),
+                    role=UserRole.ADMIN,
+                    phone="1234567890",
+                    is_active=True,
+                )
+                seed_db.add(admin_user)
+                seed_db.commit()
+                logger.info("[DB:Seed] Seeded default Admin: admin@hospital.org")
+
+            # 2. Seed Doctor
+            doc_user = seed_db.query(User).filter(User.email == "doctor@hospital.org").first()
+            if not doc_user:
+                doc_user = User(
+                    name="Dr. Gregory House",
+                    email="doctor@hospital.org",
+                    password_hash=hash_password("DoctorPass123!"),
+                    role=UserRole.DOCTOR,
+                    phone="1234567891",
+                    is_active=True,
+                )
+                seed_db.add(doc_user)
+                seed_db.commit()
+                seed_db.refresh(doc_user)
+
+                doc_profile = Doctor(
+                    user_id=doc_user.id,
+                    specialization="Cardiology",
+                    qualification="MD, FACC",
+                    experience=12,
+                    slot_duration=30,
+                    is_active=True,
+                )
+                seed_db.add(doc_profile)
+                seed_db.commit()
+                seed_db.refresh(doc_profile)
+
+                # Mon to Fri working hours (0-4) 09:00 - 17:00
+                for day in range(5):
+                    wh = DoctorWorkingHours(
+                        doctor_id=doc_profile.id,
+                        day_of_week=day,
+                        start_time=dt_time(9, 0),
+                        end_time=dt_time(17, 0),
+                    )
+                    seed_db.add(wh)
+                seed_db.commit()
+                logger.info("[DB:Seed] Seeded default Doctor: doctor@hospital.org")
+
+            # 3. Seed Demo Patient
+            patient_user = seed_db.query(User).filter(User.email == "patient@example.com").first()
+            if not patient_user:
+                patient_user = User(
+                    name="Demo Patient",
+                    email="patient@example.com",
+                    password_hash=hash_password("Password123!"),
+                    role=UserRole.PATIENT,
+                    phone="1234567892",
+                    is_active=True,
+                )
+                seed_db.add(patient_user)
+                seed_db.commit()
+                logger.info("[DB:Seed] Seeded default Patient: patient@example.com")
+
+        except Exception as err:
+            seed_db.rollback()
+            logger.warning(f"[DB:Seed] Seed execution notice: {err}")
+        finally:
+            seed_db.close()
+    except Exception as e:
+        logger.warning(f"[DB:Seed] Could not complete initial seeding: {e}")
 
 
 def get_db() -> Generator[Session, None, None]:
@@ -94,3 +177,8 @@ def get_db() -> Generator[Session, None, None]:
         yield db
     finally:
         db.close()
+
+
+# Auto-initialize tables and seed initial demo accounts
+init_db()
+
